@@ -9,7 +9,7 @@ const cors = require('cors');
 app.use(express.json());
 app.use(cors());
 
-const url = process.env.MONGOOSE_URL1;
+const url = process.env.MONGOOSE_URL;
 mongoose.connect(url).then(() => {
   console.log('Connected to DB');
 });
