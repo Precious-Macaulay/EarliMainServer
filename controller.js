@@ -222,6 +222,19 @@ const populateChildInParents = async (req, res) => {
   }
 };
 
+const getOneChild = async (req, res) => {
+  try {
+    const childid = req.params.id;
+    if (!childid) {
+      res.status(400).json({ message: 'User not Found, Check ID' });
+    }
+    const getChild = await ChildModel.findById(childid);
+    res.status(201).json({ message: 'One User Data', data: getChild });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   RegisterUser,
   VerifyOTP,
@@ -230,4 +243,5 @@ module.exports = {
   getAllUsers,
   createChildAccount,
   populateChildInParents,
+  getOneChild,
 };
