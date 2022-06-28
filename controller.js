@@ -14,7 +14,7 @@ const RegisterUser = async (req, res) => {
     const { email, password, firstname, lastname } = req.body;
     const user = await UserModel.findOne({ email });
     if (user) {
-      res.status(400).send('User already registered');
+      res.status(400).json({ message: 'Email Already Used' });
     } else {
       const OTP = otpGenerator.generate(6, {
         digits: true,
@@ -70,8 +70,7 @@ const VerifyOTP = async (req, res) => {
         });
         return res.status(200).json({
           message: 'User Regisered successfully',
-          token: token,
-          data: result,
+          data: { token: token, data: result },
         });
       } else {
         res.status(400).send('Invalid OTP');
@@ -155,8 +154,7 @@ const VerifyOTPForLogin = async (req, res) => {
 
           return res.status(200).json({
             message: `Welcome back ${findUser.firstname}`,
-            token: token,
-            data: { ...doc },
+            data: { token: token, data: { ...doc } },
           });
         }
       } else {
@@ -177,17 +175,25 @@ const getAllUsers = async (req, res) => {
 
 const createChildAccount = async (req, res) => {
   try {
-    const { firstname, lastname, age, hobbies } = req.body;
-
-    const image = await cloudinary.uploader.upload(req.file.path);
+    const { firstname, lastname, dob, relationship } = req.body;
 
     const findUser = await UserModel.findById(req.params.id);
+    if (!findUser) {
+      res.status(400).json({ message: 'User not found' });
+    }
+
+    const imageLink = req.file.path;
+    if (!imageLink) {
+      res.status(400).json({ message: 'Please input your image' });
+    }
+
+    const image = await cloudinary.uploader.upload(req.file.path);
 
     const createChild = new ChildModel({
       firstname,
       lastname,
-      age,
-      hobbies,
+      dob,
+      relationship,
       imageId: image.public_id,
       image: image.secure_url,
     });
