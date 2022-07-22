@@ -1,29 +1,44 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
-const schema = new mongoose.Schema({
-    earli: {
-        type: Number,
-        default: 0,
+const schema = new mongoose.Schema(
+  {
+    plan: {
+      type: String,
+      required: true,
     },
-    kolo: {
-        type: Number,
-        default: 0,
+    balance: {
+      type: Number,
+      default: 0,
     },
-    freedom: {
-        type: Number,
-        default: 0,
+    frequency: {
+      type: String,
+      enum: ["daily", "weekly", "monthly"],
+      required: true,
     },
-    child: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "child"
+    startDate: {
+      type: Date,
+      required: true,
     },
-    parent: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user"
+    card: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "card",
     },
-},{
-    timestamps: true
-})
+    duration: {
+      type: String,
+      required: true,
+    },
+    amount: {
+      type : Number,
+      required: true,
+    },
+    childId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "child",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-module.exports = mongoose.model("savings", schema)
-
+module.exports = mongoose.model("savings", schema);

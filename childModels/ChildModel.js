@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema({
   imageId: {
@@ -27,20 +27,27 @@ const schema = new mongoose.Schema({
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
+    ref: "user",
+  },
+  wallet: {
+    balance: {
+      type: Number,
+      default: 0,
+    },
   },
   savings: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'savings',
+      ref: "savings",
     },
   ],
   investments: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'investment',
+      ref: "investment",
     },
   ],
 });
 
-module.exports = mongoose.model('child', schema);
+module.exports = mongoose.model("child", schema);
+
