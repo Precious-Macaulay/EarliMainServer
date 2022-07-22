@@ -1,9 +1,10 @@
 const ChildSavingsModel = require("../childModels/ChildSavingsModel");
-const { chargeCard, verifyPayment } = require("../paymentController");
+
 
 module.exports = function (agenda) {
   agenda.define("chargeCard", async (job) => {
-    chargeCard(job.attrs.data.form, async (error, response) => {
+    const { chargeCard, verifyPayment, form } = job.attrs.data;
+    chargeCard(form, async (error, response) => {
       if (error) {
         console.log(error);
       }

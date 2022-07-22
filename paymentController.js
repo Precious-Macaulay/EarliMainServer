@@ -229,7 +229,11 @@ const createSavingsPlan = async (req, res) => {
       email: findCard.email,
       amount: `${parseInt(amount) * 100} `,
     };
-    const job = agenda.create("chargeCard", { form: form });
+    const job = agenda.create("chargeCard", {
+      chargeCard: chargeCard,
+      verifyPayment: verifyPayment,
+      form: form,
+    });
     job.repeatEvery(cronRule, {
       timezone: "Africa/Lagos",
       startDate: startTime,
