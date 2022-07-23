@@ -222,7 +222,7 @@ const createSavingsPlan = async (req, res) => {
     let durationArr = duration.split(" ");
     let durNum = parseInt(durationArr[0]);
     const startTime = new Date(...startDate.split("-"));
-    const endTime = moment(startTime).add(durNum, durationArr[1]).format();
+    const endTime = moment(new Date(...startDate.split("-"))).add(durNum, durationArr[1]).format();
     const cronRule = `@${frequency}`;
     const form = {
       authorization_code: findCard.authorization_code,
