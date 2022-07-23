@@ -209,7 +209,7 @@ const createSavingsPlan = async (req, res) => {
     const newPlan = await ChildSavingsModel.create({
       plan: plan,
       frequency: frequency,
-      startDate: new Date(...startDate.split("-")),
+      startDate: startDate,
       card: findCard,
       duration: duration,
       amount: amount,
@@ -221,8 +221,8 @@ const createSavingsPlan = async (req, res) => {
     console.log(newPlan);
     let durationArr = duration.split(" ");
     let durNum = parseInt(durationArr[0]);
-    const startTime = new Date(...startDate.split("-"));
-    const endTime = moment(new Date(...startDate.split("-"))).add(durNum, durationArr[1]).format();
+    const startTime = new Date(startDate);
+    const endTime = moment(startTime).add(durNum, durationArr[1]).format();
     const cronRule = `@${frequency}`;
     const form = {
       authorization_code: findCard.authorization_code,
