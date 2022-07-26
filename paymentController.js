@@ -60,7 +60,6 @@ const getPayLink = async (req, res) => {
       },
     },
   });
-
   res.status(200).send(body);
   // initializePayment(body, (error, body) => {
   //   if (error) {
