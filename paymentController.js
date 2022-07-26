@@ -61,16 +61,17 @@ const getPayLink = async (req, res) => {
     },
   });
 
-  initializePayment(body, (error, body) => {
-    if (error) {
-      //handle error
-      console.log(error, body);
-      res.send("Failed to initialize payment");
-    }
-    let response = JSON.parse(body);
-    console.log(response);
-    res.status(200).send(response.data.authorization_url);
-  });
+  res.status(200).send(body);
+  // initializePayment(body, (error, body) => {
+  //   if (error) {
+  //     //handle error
+  //     console.log(error, body);
+  //     res.send("Failed to initialize payment");
+  //   }
+  //   let response = JSON.parse(body);
+  //   console.log(response);
+  //   res.status(200).send(response.data.authorization_url);
+  // });
 };
 
 const saveCard = async (req, res) => {
@@ -241,7 +242,10 @@ const createSavingsPlan = async (req, res) => {
     });
     await job.save();
     console.log("Done");
-    res.status(200).send("Done");
+    res.status(200).json({
+      message: 'Plan Created Successfully',
+      data: childPopulate,
+    })
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
