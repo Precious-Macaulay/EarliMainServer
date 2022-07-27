@@ -191,12 +191,11 @@ const createSavingsPlan = async (req, res) => {
 
     if (!findChild) {
       console.log("child not found");
-      res.send("Child not Found")
     }
 
     //check if plan exist
-    const childFull = findChild.populate("savings");
-    let childPopulate = await childFull;
+    // const childFull = findChild.populate("savings");
+    // let childPopulate = await childFull;
     // if (childPopulate.savings.indexOf("plan") === -1) {
     //   console.log("you have an existing plan");
     //   res.send("you have an existing kolo plan for this child");
