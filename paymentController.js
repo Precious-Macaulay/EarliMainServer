@@ -64,8 +64,8 @@ const getPayLink = async (req, res) => {
 };
 
 const saveCard = async (req, res) => {
-  const ref = req.query.reference;
   try {
+    const ref = req.query.reference;
     verifyPayment(ref, async (error, body) => {
       if (error) {
         //handle errors appropriately
@@ -177,10 +177,10 @@ const chargeCard = async (form, myCallback) => {
 };
 
 const createSavingsPlan = async (req, res) => {
-  const childId = req.params.childId;
-  const { plan, startDate, cardId, frequency, duration, amount } = req.body;
-  console.log(req.body);
   try {
+    const childId = req.params.childId;
+    const { plan, startDate, cardId, frequency, duration, amount } = req.body;
+    console.log(req.body);
     const findChild = await child.findById(childId);
 
     if (!findChild) {
