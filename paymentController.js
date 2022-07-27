@@ -204,6 +204,10 @@ const createSavingsPlan = async (req, res) => {
             amount: amount,
             childId: findChild,
           });
+
+          findChild.savings.push(newPlan);
+          findChild.save();
+          
           console.log("plan added to DB", newPlan);
           //add plan
           let durationArr = duration.split(" ");

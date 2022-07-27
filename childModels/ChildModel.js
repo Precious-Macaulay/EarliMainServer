@@ -38,7 +38,7 @@ const schema = new mongoose.Schema({
   savings: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "savings",
+      ref: "saving",
     },
   ],
   investments: [

@@ -41,4 +41,4 @@ const schema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("savings", schema);
+module.exports = mongoose.model("saving", schema);
