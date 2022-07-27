@@ -221,13 +221,13 @@ const populateChildInParents = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-
+//populate savings
 const populateSavingsInChild = async (req, res) => {
   try {
     const getSingleChild = await ChildModel.findById(req.params.id).populate(
       'savings'
     );
-    res.status(201).json({ message: 'Child data', data: getSingleChild });
+    res.status(201).json({ message: 'Child Data', data: getSingleChild });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
