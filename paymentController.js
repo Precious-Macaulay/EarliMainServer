@@ -61,16 +61,6 @@ const getPayLink = async (req, res) => {
     },
   });
   res.status(200).send(body);
-  // initializePayment(body, (error, body) => {
-  //   if (error) {
-  //     //handle error
-  //     console.log(error, body);
-  //     res.send("Failed to initialize payment");
-  //   }
-  //   let response = JSON.parse(body);
-  //   console.log(response);
-  //   res.status(200).send(response.data.authorization_url);
-  // });
 };
 
 const saveCard = async (req, res) => {
@@ -80,72 +70,76 @@ const saveCard = async (req, res) => {
       if (error) {
         //handle errors appropriately
         console.log(error);
-      }
-      console.log(body.body);
-      let response = JSON.parse(body.body);
-
-      const data = _.at(response.data, [
-        "customer.email",
-        "authorization.authorization_code",
-        "authorization.bin",
-        "authorization.last4",
-        "authorization.exp_month",
-        "authorization.card_type",
-        "authorization.bank",
-        "authorization.country_code",
-        "authorization.brand",
-        "authorization.reusable",
-        "authorization.signature",
-      ]);
-
-      [
-        email,
-        authorization_code,
-        bin,
-        last4,
-        exp_month,
-        card_type,
-        bank,
-        country_code,
-        brand,
-        reusable,
-        signature,
-      ] = data;
-
-      const newCard = {
-        email,
-        authorization_code,
-        bin,
-        last4,
-        exp_month,
-        card_type,
-        bank,
-        country_code,
-        brand,
-        reusable,
-        signature,
-      };
-
-      const findUser = await UserModel.findOne({ email });
-      console.log(findUser);
-      if (!findUser) {
-        console.log("user not found");
-      }
-
-      const findCard = await card.findOne({ signature });
-
-      if (findCard) {
-        console.log("card already exist");
-        res.status(409).send({
-          message: "card already exist",
-          data: findUser,
-        });
+        res.status(400).send("failed to verify payment");
       } else {
-        let createCard = await card.create(newCard);
-        findUser.cards.push(createCard);
-        findUser.save();
+        console.log(body.body);
+        let response = JSON.parse(body.body);
+
+        const data = _.at(response.data, [
+          "customer.email",
+          "authorization.authorization_code",
+          "authorization.bin",
+          "authorization.last4",
+          "authorization.exp_month",
+          "authorization.card_type",
+          "authorization.bank",
+          "authorization.country_code",
+          "authorization.brand",
+          "authorization.reusable",
+          "authorization.signature",
+        ]);
+
+        [
+          email,
+          authorization_code,
+          bin,
+          last4,
+          exp_month,
+          card_type,
+          bank,
+          country_code,
+          brand,
+          reusable,
+          signature,
+        ] = data;
+
+        const newCard = {
+          email,
+          authorization_code,
+          bin,
+          last4,
+          exp_month,
+          card_type,
+          bank,
+          country_code,
+          brand,
+          reusable,
+          signature,
+        };
+
+        const findUser = await UserModel.findOne({ email });
+
+        console.log(findUser);
+
+        if (!findUser) {
+          console.log("user not found");
+          return res.status(400).json("invalid user");
+        } else {
+          const findCard = await card.findOne({ signature });
+          if (findCard) {
+            console.log("card already exist");
+            return res.status(409).json({
+              message: "card already exist",
+              data: findUser,
+            });
+          } else {
+            let createCard = await card.create(newCard);
+            findUser.cards.push(createCard);
+            findUser.save();
+            return res.status(200).json("Card added successfully");
+          }
+        }
       }
-      res.status(200).send("success");
     });
   } catch (e) {
     res.status(500).json({
@@ -160,7 +154,7 @@ const populateCardInParents = async (req, res) => {
     const getSingleParent = await UserModel.findById(req.params.id).populate(
       "cards"
     );
-    res.status(201).json({ message: "Parent data", data: getSingleParent });
+    res.status(201).send({ message: "Parent data", data: getSingleParent });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -191,64 +185,69 @@ const createSavingsPlan = async (req, res) => {
 
     if (!findChild) {
       console.log("child not found");
+      res.status(404).send("Child not found");
+    } else {
+      //check if plan exist
+      const childFull = findChild.populate("savings");
+      let childPopulate = await childFull;
+      if (childPopulate.savings.indexOf("plan") === -1) {
+        console.log("you have an existing plan");
+        return res
+          .status(400)
+          .json("you have an existing kolo plan for this child");
+      } else {
+        //find card
+        const findCard = await card.findById(cardId);
+
+        if (!findCard) {
+          console.log("card not found");
+          console.log(cardId);
+          return res.status(400).json("invalid card");
+        } else {
+          const newPlan = await ChildSavingsModel.create({
+            plan: plan,
+            frequency: frequency,
+            startDate: startDate,
+            card: findCard,
+            duration: duration,
+            amount: amount,
+            childId: findChild,
+          });
+          console.log("plan added to DB", newPlan);
+          //add plan
+          let durationArr = duration.split(" ");
+          let durNum = parseInt(durationArr[0]);
+          const startTime = new Date(startDate);
+          const endTime = moment(startTime)
+            .add(durNum, durationArr[1])
+            .format();
+          const cronRule = `@${frequency}`;
+          const form = {
+            authorization_code: findCard.authorization_code,
+            email: findCard.email,
+            amount: `${parseInt(amount) * 100} `,
+          };
+
+          //schedule job
+          const job = agenda.create("chargeCard", {
+            chargeCard: chargeCard,
+            verifyPayment: verifyPayment,
+            form: form,
+          });
+          job.repeatEvery(cronRule, {
+            timezone: "Africa/Lagos",
+            startDate: startTime,
+            endDate: endTime,
+          });
+          await job.save();
+          console.log("Job schedule successfully");
+          return res.status(200).json({
+            message: "Plan Created Successfully",
+            data: childPopulate,
+          });
+        }
+      }
     }
-
-    //check if plan exist
-    // const childFull = findChild.populate("savings");
-    // let childPopulate = await childFull;
-    // if (childPopulate.savings.indexOf("plan") === -1) {
-    //   console.log("you have an existing plan");
-    //   res.send("you have an existing kolo plan for this child");
-    // }
-
-    //find card
-    const findCard = await card.findById(cardId);
-
-    if (!findCard) {
-      console.log("card not found");
-      console.log(cardId)
-      res.status(400).send("invalid card")
-    }
-
-    const newPlan = await ChildSavingsModel.create({
-      plan: plan,
-      frequency: frequency,
-      startDate: startDate,
-      card: findCard,
-      duration: duration,
-      amount: amount,
-      childId: findChild,
-    });
-
-    console.log("plan added to DB");
-
-    console.log(newPlan);
-    let durationArr = duration.split(" ");
-    let durNum = parseInt(durationArr[0]);
-    const startTime = new Date(startDate);
-    const endTime = moment(startTime).add(durNum, durationArr[1]).format();
-    const cronRule = `@${frequency}`;
-    const form = {
-      authorization_code: findCard.authorization_code,
-      email: findCard.email,
-      amount: `${parseInt(amount) * 100} `,
-    };
-    const job = agenda.create("chargeCard", {
-      chargeCard: chargeCard,
-      verifyPayment: verifyPayment,
-      form: form,
-    });
-    job.repeatEvery(cronRule, {
-      timezone: "Africa/Lagos",
-      startDate: startTime,
-      endDate: endTime,
-    });
-    await job.save();
-    console.log("Done");
-    res.status(200).json({
-      message: 'Plan Created Successfully',
-      data: childPopulate,
-    })
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
