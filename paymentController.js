@@ -187,15 +187,6 @@ const createSavingsPlan = async (req, res) => {
       console.log("child not found");
       res.status(404).send("Child not found");
     } else {
-      //check if plan exist
-      const childFull = findChild.populate("savings");
-      let childPopulate = await childFull;
-      if (childPopulate.savings.indexOf("plan") === -1) {
-        console.log("you have an existing plan");
-        return res
-          .status(400)
-          .json("you have an existing kolo plan for this child");
-      } else {
         //find card
         const findCard = await card.findById(cardId);
 
@@ -246,7 +237,6 @@ const createSavingsPlan = async (req, res) => {
             data: childPopulate,
           });
         }
-      }
     }
   } catch (error) {
     res.status(400).json({ message: error.message });
