@@ -11,6 +11,7 @@ const {
   createChildAccount,
   populateChildInParents,
   getOneChild,
+  populateSavingsInChild
 } = require("./controller");
 const {
   getPayLink,
@@ -27,6 +28,7 @@ router.post("/child/:id", multer, createChildAccount);
 router.post("/createplan/:childId", createSavingsPlan);
 router.get("/cardlink/:id", getPayLink);
 router.get("/oneparent/:id", populateChildInParents);
+router.get("/onechild/:childid", populateSavingsInChild);
 router.get("/parentcards/:id", populateCardInParents);
 router.get("/allusers", getAllUsers);
 router.get("/child/:id", getOneChild);

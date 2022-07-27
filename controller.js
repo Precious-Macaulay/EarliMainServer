@@ -222,6 +222,17 @@ const populateChildInParents = async (req, res) => {
   }
 };
 
+const populateSavingsInChild = async (req, res) => {
+  try {
+    const getSingleChild = await ChildModel.findById(req.params.id).populate(
+      'savings'
+    );
+    res.status(201).json({ message: 'Child data', data: getSingleChild });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 const getOneChild = async (req, res) => {
   try {
     const childid = req.params.id;
@@ -244,4 +255,5 @@ module.exports = {
   createChildAccount,
   populateChildInParents,
   getOneChild,
+  populateSavingsInChild,
 };
