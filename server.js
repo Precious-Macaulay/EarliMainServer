@@ -7,8 +7,10 @@ const router = require("./router");
 const cors = require("cors");
 const Agendash = require("agendash");
 const agenda = require("./lib/agenda");
+const bodyParser = require("body-parser");
 
-app.use(express.json());
+app.use(bodyParser.urlencoded({extended: true }));
+app.use(bodyParser.json());
 app.use(cors());
 app.use("/dash", Agendash(agenda));
 
