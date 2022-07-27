@@ -224,6 +224,7 @@ const populateChildInParents = async (req, res) => {
 //populate savings
 const populateSavingsInChild = async (req, res) => {
   try {
+    console.log(req.params.id)
     const getSingleChild = await ChildModel.findById(req.params.id).populate(
       'savings'
     );
