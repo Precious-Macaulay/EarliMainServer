@@ -234,7 +234,6 @@ const createSavingsPlan = async (req, res) => {
           console.log("Job schedule successfully");
           return res.status(200).json({
             message: "Plan Created Successfully",
-            data: childPopulate,
           });
         }
     }
