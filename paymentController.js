@@ -185,7 +185,7 @@ const chargeCard = async (form, myCallback) => {
 const createSavingsPlan = async (req, res) => {
   const childId = req.params.childId;
   const { plan, startDate, cardId, frequency, duration, amount } = req.body;
-  console.log(req);
+  console.log(req.body);
   try {
     const findChild = await child.findById(childId);
 
