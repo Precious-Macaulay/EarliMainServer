@@ -8,7 +8,6 @@ const cardSchema = new mongoose.Schema({
   authorization_code : {
     type: String,
     required: true,
-    select: false
   },bin : {
     type: String,
     required: true
