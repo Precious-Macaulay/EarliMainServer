@@ -206,7 +206,7 @@ const createSavingsPlan = async (req, res) => {
         const form = {
           authorization_code: findCard.authorization_code,
           email: findCard.email,
-          amount: `${parseInt(amount) * 100} `,
+          amount: `${parseInt(amount) * 100}`,
         };
         console.log(form,startTime);
         //schedule job

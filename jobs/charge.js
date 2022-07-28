@@ -49,7 +49,6 @@ module.exports = function (agenda) {
             if (error) {
               //handle error
               console.log(error, body);
-              res.send("Failed to verify payment");
             } else {
               if (body.body.data.status !== "success") {
                 console.log("payment failed");
