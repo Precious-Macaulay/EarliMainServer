@@ -81,6 +81,7 @@ const saveCard = async (req, res) => {
           "authorization.bin",
           "authorization.last4",
           "authorization.exp_month",
+          "authorization.exp_year",
           "authorization.card_type",
           "authorization.bank",
           "authorization.country_code",
@@ -95,6 +96,7 @@ const saveCard = async (req, res) => {
           bin,
           last4,
           exp_month,
+          exp_year,
           card_type,
           bank,
           country_code,
@@ -109,6 +111,7 @@ const saveCard = async (req, res) => {
           bin,
           last4,
           exp_month,
+          exp_year,
           card_type,
           bank,
           country_code,
@@ -160,22 +163,6 @@ const populateCardInParents = async (req, res) => {
   }
 };
 
-//paystack charge authorization
-const chargeCard = async (form, myCallback) => {
-  var options = {
-    url: "https://api.paystack.co/transaction/charge_authorization",
-    headers: {
-      Authorization: `Bearer ${process.env.SECRET_KEY}`,
-      "Content-Type": "application/json",
-    },
-    form,
-  };
-  const callback = (error, response, body) => {
-    return myCallback(error, body);
-  };
-  request.post(options, callback);
-};
-
 const createSavingsPlan = async (req, res) => {
   try {
     const childId = req.params.childId;
@@ -187,64 +174,60 @@ const createSavingsPlan = async (req, res) => {
       console.log("child not found");
       res.status(404).send("Child not found");
     } else {
-        //find card
-        const findCard = await card.findById(cardId);
+      //find card
+      const findCard = await card.findById(cardId);
 
-        if (!findCard) {
-          console.log("card not found");
-          console.log(cardId);
-          return res.status(400).json("invalid card");
-        } else {
-          const newPlan = await ChildSavingsModel.create({
-            plan: plan,
-            frequency: frequency,
-            startDate: startDate,
-            card: findCard,
-            duration: duration,
-            amount: amount,
-            childId: findChild,
-          });
+      if (!findCard) {
+        console.log("card not found");
+        console.log(cardId);
+        return res.status(400).json("invalid card");
+      } else {
+        const newPlan = await ChildSavingsModel.create({
+          plan: plan,
+          frequency: frequency,
+          startDate: startDate,
+          card: findCard,
+          duration: duration,
+          amount: amount,
+          childId: findChild,
+        });
 
-          findChild.savings.push(newPlan);
-          findChild.save();
-          
-          console.log("plan added to DB", newPlan);
-          //add plan
-          let durationArr = duration.split(" ");
-          let durNum = parseInt(durationArr[0]);
-          const startTime = new Date(startDate);
-          const endTime = moment(startTime)
-            .add(durNum, durationArr[1])
-            .format();
-          const cronRule = `@${frequency}`;
-          const form = {
-            authorization_code: findCard.authorization_code,
-            email: findCard.email,
-            amount: `${parseInt(amount) * 100} `,
-          };
+        findChild.savings.push(newPlan);
+        findChild.save();
 
-          //schedule job
-          const job = agenda.create("chargeCard", {
-            chargeCard: chargeCard,
-            verifyPayment: verifyPayment,
-            form: form,
-          });
-          job.repeatEvery(cronRule, {
-            timezone: "Africa/Lagos",
-            startDate: startTime,
-            endDate: endTime,
-          });
-          await job.save();
+        console.log("plan added to DB", newPlan);
+        //add plan
+        let durationArr = duration.split(" ");
+        let durNum = parseInt(durationArr[0]);
+        const startTime = new Date(startDate);
+        const endTime = moment(startTime).add(durNum, durationArr[1]).format();
+        const cronRule = `@${frequency}`;
+        const form = {
+          authorization_code: findCard.authorization_code,
+          email: findCard.email,
+          amount: `${parseInt(amount) * 100} `,
+        };
 
-          job.run((err, job) => {
-            console.log("Job run");
-          });
-          
-          console.log("Job schedule successfully");
-          return res.status(200).json({
-            message: "Plan Created Successfully",
-          });
-        }
+        //schedule job
+        const job = agenda.create("chargeCard", {
+          form: form,
+        });
+        job.repeatEvery(cronRule, {
+          timezone: "Africa/Lagos",
+          startDate: startTime,
+          endDate: endTime,
+        });
+        await job.save();
+
+        job.run((err, job) => {
+          console.log(err, job);
+        });
+
+        console.log("Job schedule successfully");
+        return res.status(200).json({
+          message: "Plan Created Successfully",
+        });
+      }
     }
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -256,6 +239,5 @@ module.exports = {
   saveCard,
   populateCardInParents,
   createSavingsPlan,
-  chargeCard,
   verifyPayment,
 };

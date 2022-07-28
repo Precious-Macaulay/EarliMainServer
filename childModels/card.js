@@ -18,6 +18,9 @@ const cardSchema = new mongoose.Schema({
   },exp_month : {
     type: String,
     required: true
+  },exp_year : {
+    type: String,
+    required: true
   },card_type : {
     type: String,
     required: true
