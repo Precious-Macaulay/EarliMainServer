@@ -5,22 +5,6 @@ module.exports = function (agenda) {
   agenda.define("charge card", async (job) => {
     const form = job.attrs.data;
 
-    //paystack charge authorization
-    const chargeCard = async (form, myCallback) => {
-      var options = {
-        url: "https://api.paystack.co/transaction/charge_authorization",
-        headers: {
-          Authorization: `Bearer ${process.env.SECRET_KEY}`,
-          "Content-Type": "application/json",
-        },
-        form,
-      };
-      const callback = (error, response, body) => {
-        return myCallback(error, body);
-      };
-      request.post(options, callback);
-    };
-
     const verifyPayment = (ref, mycallback) => {
       const options = {
         url:
@@ -36,14 +20,21 @@ module.exports = function (agenda) {
       request(options, callback);
     };
 
-    await chargeCard(form, async (error, response) => {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log(response,body,error);
-        const ref = response.data.reference;
+    var options = {
+      url: "https://api.paystack.co/transaction/charge_authorization",
+      headers: {
+        Authorization: `Bearer ${process.env.SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      form : form,
+    };
+
+    request(options, function (error, response) {
+      if (error) throw new Error(error);
+      console.log(response.body);
+      const ref = response.body.reference;
         if (!ref) {
-          console.log("error");
+          console.log("no ref");
         } else {
           verifyPayment(ref, async (error, body) => {
             if (error) {
@@ -63,7 +54,6 @@ module.exports = function (agenda) {
             }
           });
         }
-      }
     });
   });
 };
