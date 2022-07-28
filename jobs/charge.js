@@ -40,7 +40,7 @@ module.exports = function (agenda) {
       if (error) {
         console.log(error);
       } else {
-        console.log(response,"here");
+        console.log(response);
         const ref = response.data.reference;
         if (!ref) {
           console.log("error");
