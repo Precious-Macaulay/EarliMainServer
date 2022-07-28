@@ -37,11 +37,11 @@ module.exports = function (agenda) {
     };
 
     await chargeCard(form, async (error, response) => {
-      console.log(response);
-      const ref = response.data.reference;
       if (error) {
         console.log(error);
       } else {
+        console.log(response);
+        const ref = response.data.reference;
         if (!ref) {
           console.log("error");
         } else {
