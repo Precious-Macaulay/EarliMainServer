@@ -1,7 +1,7 @@
 const ChildSavingsModel = require("../childModels/ChildSavingsModel");
 
 module.exports = function (agenda) {
-  agenda.define("chargeCard", async (job) => {
+  agenda.define("charge card", async (job) => {
     const form = job.attrs.data;
 
     //paystack charge authorization

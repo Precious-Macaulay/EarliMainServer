@@ -210,7 +210,7 @@ const createSavingsPlan = async (req, res) => {
         };
         console.log(form)
         //schedule job
-        const job = agenda.create("chargeCard", {
+        const job = agenda.create("charge card", {
           form: form,
         });
         job.repeatEvery(cronRule, {
