@@ -176,6 +176,7 @@ const createSavingsPlan = async (req, res) => {
     } else {
       //find card
       const findCard = await card.findById(cardId);
+      console.log(findCard)
 
       if (!findCard) {
         console.log("card not found");
@@ -207,7 +208,7 @@ const createSavingsPlan = async (req, res) => {
           email: findCard.email,
           amount: `${parseInt(amount) * 100} `,
         };
-
+        console.log(form)
         //schedule job
         const job = agenda.create("chargeCard", {
           form: form,
