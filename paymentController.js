@@ -235,6 +235,11 @@ const createSavingsPlan = async (req, res) => {
             endDate: endTime,
           });
           await job.save();
+
+          job.run((err, job) => {
+            console.log("Job run");
+          });
+          
           console.log("Job schedule successfully");
           return res.status(200).json({
             message: "Plan Created Successfully",
