@@ -3,22 +3,7 @@ const request = require("request");
 
 module.exports = function (agenda) {
   agenda.define("charge card", async (job) => {
-    const form = job.attrs.data;
-
-    const verifyPayment = (ref, mycallback) => {
-      const options = {
-        url:
-          "https://api.paystack.co/transaction/verify/" +
-          encodeURIComponent(ref),
-        headers: {
-          Authorization: `Bearer ${process.env.SECRET_KEY}`,
-        },
-      };
-      const callback = (error, body) => {
-        return mycallback(error, body);
-      };
-      request(options, callback);
-    };
+    const {form, plan} = job.attrs.data;
 
     const options = {
       method: "POST",
@@ -37,21 +22,25 @@ module.exports = function (agenda) {
       if (!ref) {
         console.log("no ref");
       } else {
-        verifyPayment(ref, async (error, body) => {
-          if (error) {
-            //handle error
-            console.log(error, body);
+        const options = {
+          method: "GET",
+          url: `https://api.paystack.co/transaction/verify/${ref}`,
+          headers: {
+            Authorization:
+            `Bearer ${process.env.SECRET_KEY}`,
+          },
+        };
+        request(options, function (error, response) {
+          if (error) throw new Error(error);
+          if (response.status) {
+            const updateBalance = await ChildSavingsModel.findOneAndUpdate(
+             plan,
+              { $inc: { balance: amount } },
+              { new: true }
+            );
+            console.log(updateBalance);
           } else {
-            if (body.body.data.status !== "success") {
-              console.log("payment failed");
-            } else {
-              const updateBalance = await ChildSavingsModel.findOneAndUpdate(
-                newPlan,
-                { $inc: { balance: amount } },
-                { new: true }
-              );
-              console.log(updateBalance);
-            }
+            console.log("Verify payment failed");
           }
         });
       }
