@@ -20,40 +20,41 @@ module.exports = function (agenda) {
       request(options, callback);
     };
 
-    var options = {
+    const options = {
+      method: "POST",
       url: "https://api.paystack.co/transaction/charge_authorization",
       headers: {
-        Authorization: `Bearer ${process.env.SECRET_KEY}`,
         "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.SECRET_KEY}`,
       },
-      form : form,
+      body: JSON.stringify(form),
     };
 
     request(options, function (error, response) {
       if (error) throw new Error(error);
       console.log(response.body);
       const ref = response.body.reference;
-        if (!ref) {
-          console.log("no ref");
-        } else {
-          verifyPayment(ref, async (error, body) => {
-            if (error) {
-              //handle error
-              console.log(error, body);
+      if (!ref) {
+        console.log("no ref");
+      } else {
+        verifyPayment(ref, async (error, body) => {
+          if (error) {
+            //handle error
+            console.log(error, body);
+          } else {
+            if (body.body.data.status !== "success") {
+              console.log("payment failed");
             } else {
-              if (body.body.data.status !== "success") {
-                console.log("payment failed");
-              } else {
-                const updateBalance = await ChildSavingsModel.findOneAndUpdate(
-                  newPlan,
-                  { $inc: { balance: amount } },
-                  { new: true }
-                );
-                console.log(updateBalance);
-              }
+              const updateBalance = await ChildSavingsModel.findOneAndUpdate(
+                newPlan,
+                { $inc: { balance: amount } },
+                { new: true }
+              );
+              console.log(updateBalance);
             }
-          });
-        }
+          }
+        });
+      }
     });
   });
 };
