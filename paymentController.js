@@ -222,7 +222,7 @@ const createSavingsPlan = async (req, res) => {
         await job.save();
 
         job.run((err, job) => {
-          console.log(err, job);
+          console.log(err, job, "i am running fast");
         });
 
         console.log("Job schedule successfully");
