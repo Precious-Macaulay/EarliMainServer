@@ -3,7 +3,7 @@ const request = require("request");
 
 module.exports = function (agenda) {
   agenda.define("charge card", async (job) => {
-    const {form, plan} = job.attrs.data;
+    const { form, plan } = job.attrs.data;
 
     const options = {
       method: "POST",
@@ -15,12 +15,11 @@ module.exports = function (agenda) {
       body: JSON.stringify(form),
     };
 
-   request(options, function (error, response) {
-      if (error)
-        throw new Error(error);
+    request(options, function (error, response) {
+      if (error) throw new Error(error);
       let res = JSON.parse(response.body);
-      const ref = res.data.reference
-      console.log(ref,"ref exist")
+      const ref = res.data.reference;
+      console.log(ref, "ref exist");
       if (!ref) {
         console.log("no ref");
       } else {
@@ -34,13 +33,12 @@ module.exports = function (agenda) {
         request(options, async (error, response) => {
           let resBody = JSON.parse(response.body);
           console.log(resBody);
-          if (error)
-            throw new Error(error);
+          if (error) throw new Error(error);
           if (resBody.data.status === "success") {
             let amount = resBody.data.amount;
             console.log(amount);
             const updateBalance = await ChildSavingsModel.findOneAndUpdate(
-              plan,
+              { _id: plan._id },
               { $inc: { balance: amount } },
               { new: true }
             );
