@@ -43,7 +43,7 @@ module.exports = function (agenda) {
               { new: true }
             );
             console.log("updated");
-            console.log(plan);
+            console.log(plan, updateBalance);
           } else {
             console.log("Verify payment failed");
           }
