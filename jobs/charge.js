@@ -45,6 +45,7 @@ module.exports = function (agenda) {
               { new: true }
             );
             console.log("updated");
+            console.log(plan);
           } else {
             console.log("Verify payment failed");
           }
