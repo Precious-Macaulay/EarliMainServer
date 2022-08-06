@@ -20,6 +20,7 @@ module.exports = function (agenda) {
         throw new Error(error);
       let res = JSON.parse(response.body);
       const ref = res.data.reference
+      console.log(ref,"ref exist")
       if (!ref) {
         console.log("no ref");
       } else {
@@ -31,19 +32,19 @@ module.exports = function (agenda) {
           },
         };
         request(options, function (error, response) {
-          console.log(response)
           let resBody = JSON.parse(response.body);
           console.log(resBody);
           if (error)
             throw new Error(error);
-          if (resBody.data.status) {
+          if (resBody.data.status === "success") {
             let amount = resBody.data.amount;
+            console.log(amount);
             const updateBalance = ChildSavingsModel.findOneAndUpdate(
               plan,
               { $inc: { balance: amount } },
               { new: true }
             );
-            console.log(updateBalance);
+            console.log("updated");
           } else {
             console.log("Verify payment failed");
           }
