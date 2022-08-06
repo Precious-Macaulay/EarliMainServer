@@ -218,12 +218,9 @@ const createSavingsPlan = async (req, res) => {
           timezone: "Africa/Lagos",
           startDate: startTime,
           endDate: endTime,
+          skipImmediate: true,
         });
         await job.save();
-
-        job.run((err, job) => {
-          console.log(err, job, "i am running fast");
-        });
 
         console.log("Job schedule successfully");
         return res.status(200).json({
