@@ -34,7 +34,8 @@ module.exports = function (agenda) {
           console.log(response)
           if (error)
             throw new Error(error);
-          if (response.status) {
+          if (response.body.status) {
+            let amount = response.body.data.amount;
             const updateBalance = ChildSavingsModel.findOneAndUpdate(
               plan,
               { $inc: { balance: amount } },
