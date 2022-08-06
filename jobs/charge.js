@@ -31,7 +31,7 @@ module.exports = function (agenda) {
             Authorization: `Bearer ${process.env.SECRET_KEY}`,
           },
         };
-        request(options, function (error, response) {
+        request(options, async (error, response) => {
           let resBody = JSON.parse(response.body);
           console.log(resBody);
           if (error)
@@ -39,7 +39,7 @@ module.exports = function (agenda) {
           if (resBody.data.status === "success") {
             let amount = resBody.data.amount;
             console.log(amount);
-            const updateBalance = ChildSavingsModel.findOneAndUpdate(
+            const updateBalance = await ChildSavingsModel.findOneAndUpdate(
               plan,
               { $inc: { balance: amount } },
               { new: true }
