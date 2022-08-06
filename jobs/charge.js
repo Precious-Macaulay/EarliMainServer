@@ -18,7 +18,7 @@ module.exports = function (agenda) {
    request(options, function (error, response) {
       if (error)
         throw new Error(error);
-      console.log(response.body);
+      console.log(response.body.data);
       const ref = response.body.data.reference;
       if (!ref) {
         console.log("no ref");
