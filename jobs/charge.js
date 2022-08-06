@@ -18,8 +18,8 @@ module.exports = function (agenda) {
    request(options, function (error, response) {
       if (error)
         throw new Error(error);
-      console.log(response.body.data);
-      const ref = response.body.data.reference;
+      let res = JSON.parse(response.body);
+      const ref = res.data.reference
       if (!ref) {
         console.log("no ref");
       } else {
@@ -32,10 +32,12 @@ module.exports = function (agenda) {
         };
         request(options, function (error, response) {
           console.log(response)
+          let resBody = JSON.parse(response.body);
+          console.log(resBody);
           if (error)
             throw new Error(error);
-          if (response.body.status) {
-            let amount = response.body.data.amount;
+          if (resBody.data.status) {
+            let amount = resBody.data.amount;
             const updateBalance = ChildSavingsModel.findOneAndUpdate(
               plan,
               { $inc: { balance: amount } },
