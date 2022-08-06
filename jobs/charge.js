@@ -15,8 +15,9 @@ module.exports = function (agenda) {
       body: JSON.stringify(form),
     };
 
-    request(options, function (error, response) {
-      if (error) throw new Error(error);
+   request(options, function (error, response) {
+      if (error)
+        throw new Error(error);
       console.log(response.body);
       const ref = response.body.reference;
       if (!ref) {
@@ -26,15 +27,15 @@ module.exports = function (agenda) {
           method: "GET",
           url: `https://api.paystack.co/transaction/verify/${ref}`,
           headers: {
-            Authorization:
-            `Bearer ${process.env.SECRET_KEY}`,
+            Authorization: `Bearer ${process.env.SECRET_KEY}`,
           },
         };
         request(options, function (error, response) {
-          if (error) throw new Error(error);
+          if (error)
+            throw new Error(error);
           if (response.status) {
-            const updateBalance = await ChildSavingsModel.findOneAndUpdate(
-             plan,
+            const updateBalance = ChildSavingsModel.findOneAndUpdate(
+              plan,
               { $inc: { balance: amount } },
               { new: true }
             );
