@@ -11,13 +11,15 @@ const {
   createChildAccount,
   populateChildInParents,
   getOneChild,
-  populateSavingsInChild
+  populateSavingsInChild,
 } = require("./controller");
 const {
   getPayLink,
   saveCard,
   populateCardInParents,
   createSavingsPlan,
+  getFund,
+  fundAChild,
 } = require("./paymentController");
 
 router.post("/register", RegisterUser);
@@ -26,6 +28,7 @@ router.post("/login", LoginUsers);
 router.post("/verifylogin", VerifyOTPForLogin);
 router.post("/child/:id", multer, createChildAccount);
 router.post("/createplan/:childId", createSavingsPlan);
+router.get("/getFund/:childId", getFund);
 router.get("/cardlink/:id", getPayLink);
 router.get("/oneparent/:id", populateChildInParents);
 router.get("/onechild/:childid", populateSavingsInChild);
@@ -33,5 +36,6 @@ router.get("/parentcards/:id", populateCardInParents);
 router.get("/allusers", getAllUsers);
 router.get("/child/:id", getOneChild);
 router.get("/paystack/callback", saveCard);
+router.get("/fundachild", fundAChild);
 
 module.exports = router;

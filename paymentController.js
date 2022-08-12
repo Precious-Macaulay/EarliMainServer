@@ -9,23 +9,6 @@ const schedule = require("node-schedule");
 const moment = require("moment");
 const agenda = require("./lib/agenda.js");
 
-//paystack helper function
-const initializePayment = (body, myCallback) => {
-  const options = {
-    url: "https://api.paystack.co/transaction/initialize",
-    headers: {
-      authorization: `Bearer ${process.env.SECRET_KEY}`,
-      "content-type": "application/json",
-      "cache-control": "no-cache",
-    },
-    body,
-  };
-  const callback = (error, response, body) => {
-    return myCallback(error, body);
-  };
-  request.post(options, callback);
-};
-
 const verifyPayment = (ref, mycallback) => {
   const options = {
     url:
@@ -233,10 +216,39 @@ const createSavingsPlan = async (req, res) => {
   }
 };
 
+const getFund = (req, res) => {
+  try {
+  const childId = req.params.childId;
+
+  const foundChild = await childModel.findById(childId);
+
+  if (!foundChild) {
+    res.status(400).json({ message: "Child not found" });
+  }
+
+  const body = JSON.stringify({
+    email: foundUser.email,
+    amount: "10000",
+    callback_url: "https://earli.heroku.app/fundachild",
+    metadata: {
+      child_name: `${foundChild.lastname} ${foundChild.firstname}`,
+      child_id: foundChild._id
+    },
+  });
+  res.status(200).send(body);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const FundAChild = (req, res) => {};
+
 module.exports = {
   getPayLink,
   saveCard,
   populateCardInParents,
   createSavingsPlan,
   verifyPayment,
+  getFund,
+  fundAChild,
 };
