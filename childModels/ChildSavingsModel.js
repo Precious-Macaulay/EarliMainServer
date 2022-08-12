@@ -20,7 +20,7 @@ const schema = new mongoose.Schema(
       required: true,
     },
     status: {
-      type: Strings,
+      type: String,
       enum: ["Active", "Completed"],
       required: true,
     },
