@@ -259,7 +259,7 @@ const createWalletTransaction = async (childId, status, currency, amount) => {
 };
 
 const createTransaction = async (
-  userId,
+  childId,
   id,
   status,
   currency,
@@ -269,7 +269,7 @@ const createTransaction = async (
   try {
     // create transaction
     const transaction = await Transaction.create({
-      userId,
+      childId,
       transactionId: id,
       name: customer.name,
       email: customer.email,
