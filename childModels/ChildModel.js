@@ -33,7 +33,7 @@ const schema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  walletTransaction: {
+  walletTransactions: {
     type: [
       {
         type: mongoose.Schema.Types.ObjectId,

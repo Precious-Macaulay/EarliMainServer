@@ -1,13 +1,14 @@
 const _ = require("lodash");
 const request = require("request");
-const card = require("./childModels/card");
-const child = require("./childModels/ChildModel");
+const CardModel = require("./childModels/card");
+const ChildModel = require("./childModels/ChildModel");
 const ChildSavingsModel = require("./childModels/ChildSavingsModel");
 const UserModel = require("./UserModel");
 require("dotenv").config();
-const schedule = require("node-schedule");
 const moment = require("moment");
 const agenda = require("./lib/agenda.js");
+const Transaction = require("./childModels/transaction");
+const WalletTransaction = require("./childModels/walletTransaction");
 
 const verifyPayment = (ref, mycallback) => {
   const options = {
@@ -111,7 +112,7 @@ const saveCard = async (req, res) => {
           console.log("user not found");
           return res.status(400).json("invalid user");
         } else {
-          const findCard = await card.findOne({ signature });
+          const findCard = await CardModel.findOne({ signature });
           if (findCard) {
             console.log("card already exist");
             return res.status(409).json({
@@ -119,7 +120,7 @@ const saveCard = async (req, res) => {
               data: findUser,
             });
           } else {
-            let createCard = await card.create(newCard);
+            let createCard = await CardModel.create(newCard);
             findUser.cards.push(createCard);
             findUser.save();
             return res.status(200).json("Card added successfully");
@@ -151,14 +152,14 @@ const createSavingsPlan = async (req, res) => {
     const childId = req.params.childId;
     const { plan, startDate, cardId, frequency, duration, amount } = req.body;
     console.log(req.body);
-    const findChild = await child.findById(childId);
+    const findChild = await ChildModel.findById(childId);
 
     if (!findChild) {
       console.log("child not found");
       res.status(404).send("Child not found");
     } else {
       //find card
-      const findCard = await card.findById(cardId);
+      const findCard = await CardModel.findById(cardId);
       console.log(findCard);
 
       if (!findCard) {
@@ -218,31 +219,153 @@ const createSavingsPlan = async (req, res) => {
 
 const getFund = async (req, res) => {
   try {
-  const childId = req.params.childId;
+    const childId = req.params.childId;
 
-  const foundChild = await childModel.findById(childId);
+    const foundChild = await ChildModel.findById(childId);
 
-  if (!foundChild) {
-    res.status(400).json({ message: "Child not found" });
-  }
+    if (!foundChild) {
+      res.status(400).json({ message: "Child not found" });
+    }
 
-  const body = JSON.stringify({
-    email: foundUser.email,
-    amount: "10000",
-    callback_url: "https://earli.heroku.app/fundachild",
-    metadata: {
-      child_name: `${foundChild.lastname} ${foundChild.firstname}`,
-      child_id: foundChild._id
-    },
-  });
-  res.status(200).send(body);
+    const body = JSON.stringify({
+      email: foundUser.email,
+      amount: "10000",
+      callback_url: "https://earli.heroku.app/fundachild",
+      metadata: {
+        child_name: `${foundChild.lastname} ${foundChild.firstname}`,
+        child_id: foundChild._id,
+      },
+    });
+    res.status(200).send(body);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
+const createWalletTransaction = async (childId, status, currency, amount) => {
+  try {
+    // create wallet transaction
+    const walletTransaction = await WalletTransaction.create({
+      amount,
+      childId,
+      isInflow: true,
+      currency,
+      status,
+    });
+    return walletTransaction;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const createTransaction = async (
+  userId,
+  id,
+  status,
+  currency,
+  amount,
+  customer
+) => {
+  try {
+    // create transaction
+    const transaction = await Transaction.create({
+      userId,
+      transactionId: id,
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone_number,
+      amount,
+      currency,
+      paymentStatus: status,
+      paymentGateway: "paystack",
+    });
+    return transaction;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const updateChildWallet = async (
+  childId,
+  amount,
+  createdWalletTransaction,
+  createdTransaction
+) => {
+  try {
+    const condition = { _id: childId };
+    // update wallet
+    await ChildModel.findOneAndUpdate(condition, {
+      $addToSet: { walletTransactions: createdWalletTransaction },
+    });
+    await ChildModel.findOneAndUpdate(condition, {
+      $addToSet: { transactions: createdTransaction },
+    });
+    const wallet = await ChildModel.findOneAndUpdate(
+      condition,
+      { $inc: { walletBalance: amount } },
+      { new: true }
+    );
+    return wallet;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const fundAChild = async (req, res) => {
-  
+  const ref = req.query.reference;
+  verifyPayment(ref, async (error, body) => {
+    if (error) {
+      //handle errors appropriately
+      console.log(error);
+      res.status(400).send("failed to verify payment");
+    } else {
+      console.log(body.body);
+      let response = JSON.parse(body.body);
+      const { status, currency, id, amount, customer, metadata } =
+        response.data.data;
+
+      // check if transaction id already exist
+
+      const transactionExist = await Transaction.findOne({ transactionId: id });
+
+      if (transactionExist) {
+        return res.status(409).send("Transaction Already Exist");
+      }
+
+      // check if child exist in our database
+      const child = await ChildModel.findOne({ _id: metadata.child_id });
+
+      // create wallet transaction
+      const createdWalletTransaction = await createWalletTransaction(
+        child._id,
+        status,
+        currency,
+        amount
+      );
+
+      // create transaction
+      const createdTransaction = await createTransaction(
+        child._id,
+        id,
+        status,
+        currency,
+        amount,
+        customer
+      );
+
+      const wallet = await updateChildWallet(
+        child._id,
+        amount,
+        createdWalletTransaction,
+        createdTransaction
+      );
+
+      return res.status(200).json({
+        response: "wallet funded successfully",
+        data: wallet,
+      });
+    }
+  });
 };
 
 module.exports = {

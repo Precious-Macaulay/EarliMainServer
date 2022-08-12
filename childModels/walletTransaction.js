@@ -5,7 +5,7 @@ const walletTransactionSchema = new mongoose.Schema(
     amount: { type: Number, default: 0 },
     childId: {
       type: String,
-      ref: "users",
+      ref: "child",
       required: true,
     },
 
