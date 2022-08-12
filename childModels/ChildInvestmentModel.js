@@ -1,23 +1,41 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
-const schema = new mongoose.Schema({
+const schema = new mongoose.Schema(
+  {
     investmentType: {
-        type: Strings,
-        enum: ["treasuryBills", "stocks", "RealEstate", "Shares"],
-        required: true,
+      type: String,
+      enum: ["treasuryBills", "stocks", "RealEstate", "Shares"],
+      required: true,
+    },
+    balance: {
+      type: Number,
+      default: 0,
     },
     amount: {
-        type: Number,
-        default: 0,
-        required: true,
+      type: Number,
+      required: true,
+    },
+    interest: {
+      type: Number,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum : ["Active", "Completed"],
+      required: true
+    },
+    duration: {
+        type: String,
+        require: true
     },
     child: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "child"
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "child",
     },
-},{
-    timestamps: true
-})
+  },
+  {
+    timestamps: true,
+  }
+);
 
-module.exports = mongoose.model("investment", schema)
-
+module.exports = mongoose.model("investment", schema);

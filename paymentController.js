@@ -9,6 +9,7 @@ const moment = require("moment");
 const agenda = require("./lib/agenda.js");
 const Transaction = require("./childModels/transaction");
 const WalletTransaction = require("./childModels/walletTransaction");
+const ChildInvestmentModel = require("./childModels/ChildInvestmentModel");
 
 const verifyPayment = (ref, mycallback) => {
   const options = {
@@ -209,7 +210,7 @@ const createSavingsPlan = async (req, res) => {
         });
         await job.save();
 
-        agenda.schedule(endTime, "close savings", {plan: newPlan});
+        agenda.schedule(endTime, "close savings", { plan: newPlan });
         console.log("Job schedule successfully");
         return res.status(200).json({
           message: "Plan Created Successfully",
@@ -372,6 +373,36 @@ const fundAChild = async (req, res) => {
   });
 };
 
+const createInvestment = async (req, res) => {
+  const { childId } = req.params.childId;
+  const { investmentType, amount, duration, interest } = req.body;
+
+  try {
+    const foundChild = await ChildModel.findById(childId);
+    if (!foundChild) {
+      res.send(400).send({ message: "Child not found" });
+    }
+
+    foundChild.update({ $inc: { walletBalance: -amount } });
+
+    const newInvestment = await ChildInvestmentModel.create({
+      investmentType,
+      amount,
+      balance: amount,
+      duration,
+      interest,
+      status: "Active",
+      child: foundChild,
+    });
+
+    res
+      .status(200)
+      .send({ message: "Investment created", data: newInvestment });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getPayLink,
   saveCard,
@@ -380,4 +411,5 @@ module.exports = {
   verifyPayment,
   getFund,
   fundAChild,
+  createInvestment,
 };
