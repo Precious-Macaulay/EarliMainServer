@@ -216,7 +216,7 @@ const createSavingsPlan = async (req, res) => {
   }
 };
 
-const getFund = (req, res) => {
+const getFund = async (req, res) => {
   try {
   const childId = req.params.childId;
 
@@ -241,7 +241,9 @@ const getFund = (req, res) => {
   }
 };
 
-const FundAChild = (req, res) => {};
+const fundAChild = async (req, res) => {
+  
+};
 
 module.exports = {
   getPayLink,
