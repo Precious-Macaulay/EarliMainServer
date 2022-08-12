@@ -382,7 +382,10 @@ const createInvestment = async (req, res) => {
     if (!foundChild) {
       res.send(400).send({ message: "Child not found" });
     }
-
+    if (foundChild.walletBalance < amount) {
+      res.send(400).send({ message: "insufficient fund" });
+    }
+    
     foundChild.update({ $inc: { walletBalance: -amount } });
 
     const newInvestment = await ChildInvestmentModel.create({
