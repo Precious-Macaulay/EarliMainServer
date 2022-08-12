@@ -19,6 +19,11 @@ const schema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    status: {
+      type: Strings,
+      enum: ["Active", "Completed"],
+      required: true,
+    },
     card: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "card",
@@ -28,7 +33,7 @@ const schema = new mongoose.Schema(
       required: true,
     },
     amount: {
-      type : Number,
+      type: Number,
       required: true,
     },
     childId: {

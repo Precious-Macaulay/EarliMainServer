@@ -171,6 +171,7 @@ const createSavingsPlan = async (req, res) => {
           plan: plan,
           frequency: frequency,
           startDate: startDate,
+          status: "Active",
           card: findCard,
           duration: duration,
           amount: amount,
@@ -193,11 +194,13 @@ const createSavingsPlan = async (req, res) => {
           amount: parseInt(amount) * 100,
         };
         console.log(form, startTime);
+
         //schedule job
         const job = agenda.create("charge card", {
           form: form,
           plan: newPlan,
         });
+
         job.repeatEvery(cronRule, {
           timezone: "Africa/Lagos",
           startDate: startTime,
@@ -206,6 +209,7 @@ const createSavingsPlan = async (req, res) => {
         });
         await job.save();
 
+        agenda.schedule(endTime, "close savings", {plan: newPlan});
         console.log("Job schedule successfully");
         return res.status(200).json({
           message: "Plan Created Successfully",

@@ -1,4 +1,5 @@
 const ChildSavingsModel = require("../childModels/ChildSavingsModel");
+const ChildModel = require("../childModels/ChildModel");
 const request = require("request");
 
 module.exports = function (agenda) {
@@ -50,5 +51,20 @@ module.exports = function (agenda) {
         });
       }
     });
+  });
+
+  agenda.define("close savings", (job) => {
+    const { plan } = job.attrs.data;
+
+    const foundPlan = ChildSavingsModel.findOneAndUpdate(
+      { _id: plan._id },
+      { $set: { status: "Completed" } },
+      { new: true }
+    );
+
+    ChildModel.findOneAndUpdate(
+      { _id: foundPlan.child },
+      { $inc: { walletBalance: foundPlan.balance } }
+    );
   });
 };
