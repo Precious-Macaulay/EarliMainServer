@@ -1,29 +1,19 @@
 const mongoose = require("mongoose")
 
 const schema = new mongoose.Schema({
-    treasuryBills: {
-        type: Number,
-        default: 0,
+    investmentType: {
+        type: Strings,
+        enum: ["treasuryBills", "stocks", "RealEstate", "Shares"],
+        required: true,
     },
-    stocks: {
+    amount: {
         type: Number,
         default: 0,
-    },
-    RealEstate: {
-        type: Number,
-        default: 0,
-    },
-    Shares: {
-        type: Number,
-        default: 0,
+        required: true,
     },
     child: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "child"
-    },
-    parent: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user"
     },
 },{
     timestamps: true

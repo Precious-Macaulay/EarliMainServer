@@ -29,11 +29,25 @@ const schema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
   },
-  wallet: {
-    balance: {
-      type: Number,
-      default: 0,
-    },
+  walletBalance: {
+    type: Number,
+    default: 0,
+  },
+  walletTransaction: {
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "walletTransaction"
+      },
+    ],
+  },
+  transactions: {
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "transaction",
+      },
+    ],
   },
   savings: [
     {
