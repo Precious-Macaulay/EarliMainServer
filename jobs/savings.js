@@ -1,6 +1,8 @@
 const ChildSavingsModel = require("../childModels/ChildSavingsModel");
 const ChildModel = require("../childModels/ChildModel");
 const request = require("request");
+const Transaction = require("./childModels/transaction");
+const WalletTransaction = require("./childModels/walletTransaction");
 
 module.exports = function (agenda) {
   agenda.define("charge card", async (job) => {
@@ -36,7 +38,7 @@ module.exports = function (agenda) {
           console.log(resBody);
           if (error) throw new Error(error);
           if (resBody.data.status === "success") {
-            let amount = resBody.data.amount;
+            let { amount, currency, status } = resBody.data;
             console.log(amount);
             const updateBalance = await ChildSavingsModel.findOneAndUpdate(
               { _id: plan._id },
@@ -45,6 +47,19 @@ module.exports = function (agenda) {
             );
             console.log("updated");
             console.log(plan, updateBalance);
+
+            const createdWalletTransaction = await WalletTransaction.create({
+              amount,
+              childId: plan.childId,
+              isInflow: true,
+              currency,
+              status,
+            });
+
+            await ChildSavingsModel.findOneAndUpdate(
+              { _id: plan._id },
+              { $addToSet: { savingsTransaction: createdWalletTransaction } }
+            );
           } else {
             console.log("Verify payment failed");
           }

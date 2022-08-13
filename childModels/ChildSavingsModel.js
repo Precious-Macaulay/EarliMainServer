@@ -28,6 +28,12 @@ const schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "card",
     },
+    savingsTransaction: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "walletTransaction",
+      },
+    ],
     duration: {
       type: String,
       required: true,
