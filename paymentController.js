@@ -168,21 +168,6 @@ const createSavingsPlan = async (req, res) => {
         console.log(cardId);
         return res.status(400).json("invalid card");
       } else {
-        const newPlan = await ChildSavingsModel.create({
-          plan: plan,
-          frequency: frequency,
-          startDate: startDate,
-          status: "Active",
-          card: findCard,
-          duration: duration,
-          amount: amount,
-          childId: findChild,
-        });
-
-        findChild.savings.push(newPlan);
-        findChild.save();
-
-        console.log("plan added to DB", newPlan);
         //add plan
         let durationArr = duration.split(" ");
         let durNum = parseInt(durationArr[0]);
@@ -194,6 +179,23 @@ const createSavingsPlan = async (req, res) => {
           email: findCard.email,
           amount: parseInt(amount) * 100,
         };
+
+        const newPlan = await ChildSavingsModel.create({
+          plan: plan,
+          frequency: frequency,
+          startDate: startDate,
+          endDate: moment(new Date(endTime)).format("DD/MM/YYYY"),
+          status: "Active",
+          card: findCard,
+          duration: duration,
+          amount: amount,
+          childId: findChild,
+        });
+
+        findChild.savings.push(newPlan);
+        findChild.save();
+
+        console.log("plan added to DB", newPlan);
         console.log(form, startTime);
 
         //schedule job
