@@ -1,8 +1,8 @@
 const ChildSavingsModel = require("../childModels/ChildSavingsModel");
 const ChildModel = require("../childModels/ChildModel");
 const request = require("request");
-const Transaction = require("./childModels/transaction");
-const WalletTransaction = require("./childModels/walletTransaction");
+const Transaction = require("../childModels/transaction");
+const WalletTransaction = require("../childModels/walletTransaction");
 
 module.exports = function (agenda) {
   agenda.define("charge card", async (job) => {
