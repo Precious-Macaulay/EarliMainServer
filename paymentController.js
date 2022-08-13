@@ -385,7 +385,7 @@ const createInvestment = async (req, res) => {
     if (foundChild.walletBalance < amount) {
       res.send(400).send({ message: "insufficient fund" });
     }
-    
+
     foundChild.update({ $inc: { walletBalance: -amount } });
 
     const newInvestment = await ChildInvestmentModel.create({
@@ -406,6 +406,21 @@ const createInvestment = async (req, res) => {
   }
 };
 
+const getSavings = async (req, res) => {
+  const savingsId = req.params.savingsid;
+
+  try {
+    const foundPlan = await ChildSavingsModel.findOne({ _id: savingsId });
+    if (!foundPlan) {
+      res.status(400).send({ message: "invalid savings id" });
+    }
+
+    res.status(200).send({ plan: foundPlan });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getPayLink,
   saveCard,
@@ -415,4 +430,5 @@ module.exports = {
   getFund,
   fundAChild,
   createInvestment,
+  getSavings,
 };
