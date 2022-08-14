@@ -413,8 +413,7 @@ const getSavings = async (req, res) => {
 
   try {
     const foundPlan = await ChildSavingsModel.findById(savingsId).populate(
-      "savingsTransaction",
-      "card"
+      'card'
     );
     if (!foundPlan) {
       res.status(400).send({ message: "invalid savings id" });
