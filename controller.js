@@ -1,20 +1,20 @@
-const bcrypt = require('bcrypt');
-const otpGenerator = require('otp-generator');
-const UserModel = require('./UserModel');
-const otpModel = require('./OtpModel');
-const nodemailer = require('nodemailer');
-require('dotenv').config();
-const jwt = require('jsonwebtoken');
-const ChildModel = require('./childModels/ChildModel');
-const cloudinary = require('./utils/cloudinary');
-const RegisterVerification = require('./Gmail');
+const bcrypt = require("bcrypt");
+const otpGenerator = require("otp-generator");
+const UserModel = require("./UserModel");
+const otpModel = require("./OtpModel");
+const nodemailer = require("nodemailer");
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
+const ChildModel = require("./childModels/ChildModel");
+const cloudinary = require("./utils/cloudinary");
+const RegisterVerification = require("./Gmail");
 
 const RegisterUser = async (req, res) => {
   try {
     const { email, password, firstname, lastname } = req.body;
     const user = await UserModel.findOne({ email });
     if (user) {
-      res.status(400).json({ message: 'Email Already Used' });
+      res.status(400).json({ message: "Email Already Used" });
     } else {
       const OTP = otpGenerator.generate(6, {
         digits: true,
@@ -37,7 +37,7 @@ const RegisterUser = async (req, res) => {
 
       const result = await otp.save();
 
-      res.status(201).json({ message: 'Check your Mail for Verification' });
+      res.status(201).json({ message: "Check your Mail for Verification" });
     }
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -52,7 +52,7 @@ const VerifyOTP = async (req, res) => {
 
     const otpHolder = await otpModel.find({ email });
     if (otpHolder.length === 0) {
-      res.status(400).send('You use an expired OTP');
+      res.status(400).send("You use an expired OTP");
     } else {
       const rightOtpFind = otpHolder[otpHolder.length - 1];
       const validUser = await bcrypt.compare(otp, rightOtpFind.otp);
@@ -69,11 +69,11 @@ const VerifyOTP = async (req, res) => {
           email: rightOtpFind.email,
         });
         return res.status(200).json({
-          message: 'User Regisered successfully',
+          message: "User Regisered successfully",
           data: { token: token, data: result },
         });
       } else {
-        res.status(400).send('Invalid OTP');
+        res.status(400).send("Invalid OTP");
       }
     }
   } catch (error) {
@@ -86,11 +86,11 @@ const LoginUsers = async (req, res) => {
     const { email, password } = req.body;
     const findUser = await UserModel.findOne({ email: email });
     if (!findUser) {
-      res.status(400).json({ message: 'User Does not Exist' });
+      res.status(400).json({ message: "User Does not Exist" });
     } else {
       const checkPassword = await bcrypt.compare(password, findUser.password);
       if (!checkPassword) {
-        res.status(400).json({ message: 'Incorrect Password' });
+        res.status(400).json({ message: "Incorrect Password" });
       } else {
         const OTP = otpGenerator.generate(6, {
           digits: true,
@@ -113,7 +113,7 @@ const LoginUsers = async (req, res) => {
 
         const result = await otp.save();
 
-        res.status(201).send('Check your mail for verification');
+        res.status(201).send("Check your mail for verification");
       }
     }
   } catch (error) {
@@ -127,14 +127,14 @@ const VerifyOTPForLogin = async (req, res) => {
 
     const otpHolder = await otpModel.find({ email });
     if (otpHolder.length === 0) {
-      res.status(400).send('You use an expired OTP');
+      res.status(400).send("You use an expired OTP");
     } else {
       const rightOtpFind = otpHolder[otpHolder.length - 1];
       const validUser = await bcrypt.compare(otp, rightOtpFind.otp);
       if (validUser) {
         const findUser = await UserModel.findOne({ email: email });
         if (!findUser) {
-          res.status(404).json({ message: 'Invalid User' });
+          res.status(404).json({ message: "Invalid User" });
         } else {
           const { password, ...doc } = findUser._doc;
           const token = jwt.sign(
@@ -145,7 +145,7 @@ const VerifyOTPForLogin = async (req, res) => {
               email: findUser.email,
             },
             process.env.JWT_SECRET_KEY,
-            { expiresIn: '2d' }
+            { expiresIn: "2d" }
           );
 
           await otpModel.deleteMany({
@@ -158,7 +158,7 @@ const VerifyOTPForLogin = async (req, res) => {
           });
         }
       } else {
-        res.status(400).send('Invalid OTP');
+        res.status(400).send("Invalid OTP");
       }
     }
   } catch (error) {
@@ -169,7 +169,7 @@ const VerifyOTPForLogin = async (req, res) => {
 const getAllUsers = async (req, res) => {
   try {
     const getAll = await UserModel.find();
-    res.status(201).json({ message: 'All Users', data: getAll });
+    res.status(201).json({ message: "All Users", data: getAll });
   } catch (error) {}
 };
 
@@ -179,12 +179,12 @@ const createChildAccount = async (req, res) => {
 
     const findUser = await UserModel.findById(req.params.id);
     if (!findUser) {
-      res.status(400).json({ message: 'User not found' });
+      res.status(400).json({ message: "User not found" });
     }
 
     const imageLink = req.file.path;
     if (!imageLink) {
-      res.status(400).json({ message: 'Please input your image' });
+      res.status(400).json({ message: "Please input your image" });
     }
 
     const image = await cloudinary.uploader.upload(req.file.path);
@@ -205,7 +205,7 @@ const createChildAccount = async (req, res) => {
     findUser.save();
 
     res.status(201).json({
-      message: 'Child Account Created Successfully',
+      message: "Child Account Created Successfully",
       data: createChild,
     });
   } catch (error) {}
@@ -213,10 +213,10 @@ const createChildAccount = async (req, res) => {
 
 const populateChildInParents = async (req, res) => {
   try {
-    const getSignleParent = await UserModel.findById(req.params.id).populate(
-      {path: 'children', select: 'transactions'}
-    );
-    res.status(201).json({ message: 'Parent data', data: getSignleParent });
+    const getSignleParent = await UserModel.findById(req.params.id)
+      .populate({ path: "children", select: "transactions" })
+      .populate({ path: "children", select: "savings" });
+    res.status(201).json({ message: "Parent data", data: getSignleParent });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -224,10 +224,10 @@ const populateChildInParents = async (req, res) => {
 //populate savings
 const populateSavingsInChild = async (req, res) => {
   try {
-    const getSingleChild = await ChildModel.findById(req.params.childid).populate(
-      'savings'
-    );
-    res.status(201).json({ message: 'Child Data', data: getSingleChild });
+    const getSingleChild = await ChildModel.findById(
+      req.params.childid
+    ).populate("savings");
+    res.status(201).json({ message: "Child Data", data: getSingleChild });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -237,10 +237,10 @@ const getOneChild = async (req, res) => {
   try {
     const childid = req.params.id;
     if (!childid) {
-      res.status(400).json({ message: 'User not Found, Check ID' });
+      res.status(400).json({ message: "User not Found, Check ID" });
     }
     const getChild = await ChildModel.findById(childid);
-    res.status(201).json({ message: 'One User Data', data: getChild });
+    res.status(201).json({ message: "One User Data", data: getChild });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
