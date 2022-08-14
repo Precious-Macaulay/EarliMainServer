@@ -214,7 +214,7 @@ const createChildAccount = async (req, res) => {
 const populateChildInParents = async (req, res) => {
   try {
     const getSignleParent = await UserModel.findById(req.params.id)
-      .populate({ path: "children", populate: { path: "transaction" } })
+      .populate({ path: "children", populate: { path: "transactions" } })
       .populate({ path: "children", populate: { path: "savings" } });
     res.status(201).json({ message: "Parent data", data: getSignleParent });
   } catch (error) {
