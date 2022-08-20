@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
-
+//added enum to plan
 const schema = new mongoose.Schema(
   {
     plan: {
       type: String,
+      enum: ["Earli", "Kolo", "kolo", "Freedom"],
       required: true,
     },
     balance: {
