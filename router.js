@@ -40,6 +40,6 @@ router.get("/allusers", getAllUsers);
 router.get("/child/:id", getOneChild);
 router.get("/paystack/callback", saveCard);
 router.get("/fundachild", fundAChild);
-router.get("/savings/:savingsid", getSavings)
+router.get("/savings/:savingsid", getSavings);
 
 module.exports = router;

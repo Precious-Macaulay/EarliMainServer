@@ -45,7 +45,7 @@ const schema = new mongoose.Schema({
     type: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Transaction",
+        ref: "transaction",
       },
     ],
   },

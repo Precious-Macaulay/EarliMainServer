@@ -48,5 +48,5 @@ const transactionSchema = Schema(
   }
 );
 
-const Transaction = model("Transaction", transactionSchema);
+const Transaction = model("transaction", transactionSchema);
 module.exports = Transaction;
