@@ -30,7 +30,7 @@ router.post("/login", LoginUsers);
 router.post("/verifylogin", VerifyOTPForLogin);
 router.post("/child/:id", multer, createChildAccount);
 router.post("/createplan/:childId", createSavingsPlan);
-router.post("/invest/childId", createInvestment)
+router.post("/invest/:childId", createInvestment)
 router.get("/getFund/:childId", getFund);
 router.get("/cardlink/:id", getPayLink);
 router.get("/oneparent/:id", populateChildInParents);

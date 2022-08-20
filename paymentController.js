@@ -385,7 +385,7 @@ const createInvestment = async (req, res) => {
       res.send(400).send({ message: "Child not found" });
     }
     if (foundChild.walletBalance < amount) {
-      res.send(400).send({ message: "insufficient fund" });
+      res.send(400).send({ message: "insufficient fund , fund child wallet" });
     }
 
     foundChild.update({ $inc: { walletBalance: -amount } });
@@ -402,7 +402,7 @@ const createInvestment = async (req, res) => {
 
     res
       .status(200)
-      .send({ message: "Investment created", data: newInvestment });
+      .send({ message: "Investment created successfully", data: newInvestment });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
