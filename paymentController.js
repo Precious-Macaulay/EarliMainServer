@@ -485,7 +485,8 @@ const getParentTotals = async (req, res) => {
         getAllChildBalance(child);
       return { totalSavings, totalInvestment };
     });
-
+    console.log(allChildBalanceArr);
+    
     const { totalSavings, totalInvestment } = allChildBalanceArr.reduce(
       (prev, curr) => {
         return {
