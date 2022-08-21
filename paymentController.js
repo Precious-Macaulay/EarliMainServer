@@ -233,7 +233,7 @@ const getFund = async (req, res) => {
     if (!foundChild) {
       res.status(400).json({ message: "Child not found" });
     }
-
+    console.log(foundChild.user.email);
     const body = JSON.stringify({
       email: foundChild.user.email,
       metadata: {
