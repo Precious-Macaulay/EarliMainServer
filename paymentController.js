@@ -228,14 +228,14 @@ const getFund = async (req, res) => {
   try {
     const childId = req.params.childId;
 
-    const foundChild = await ChildModel.findById(childId);
+    const foundChild = await ChildModel.findById(childId).populate('user');
 
     if (!foundChild) {
       res.status(400).json({ message: "Child not found" });
     }
 
     const body = JSON.stringify({
-      email: foundUser.email,
+      email: foundChild.user.email,
       metadata: {
         child_name: `${foundChild.lastname} ${foundChild.firstname}`,
         child_id: foundChild._id,
