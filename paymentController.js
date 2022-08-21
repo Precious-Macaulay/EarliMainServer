@@ -236,8 +236,6 @@ const getFund = async (req, res) => {
 
     const body = JSON.stringify({
       email: foundUser.email,
-      amount: "10000",
-      callback_url: "https://earli.heroku.app/fundachild",
       metadata: {
         child_name: `${foundChild.lastname} ${foundChild.firstname}`,
         child_id: foundChild._id,
@@ -400,9 +398,10 @@ const createInvestment = async (req, res) => {
       child: foundChild,
     });
 
-    res
-      .status(200)
-      .send({ message: "Investment created successfully", data: newInvestment });
+    res.status(200).send({
+      message: "Investment created successfully",
+      data: newInvestment,
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -426,6 +425,82 @@ const getSavings = async (req, res) => {
   }
 };
 
+const getAllChildBalance = async (child) => {
+  const allSavingsBalance = child.savings.map(async (id) => {
+    const findSavings = await ChildSavingsModel.findById(id);
+    const balance = findSavings.balance;
+    return balance;
+  });
+  const allInvestmentsBalance = child.investments.map(async (id) => {
+    const findInvestment = await ChildInvestmentModel.findById(id);
+    const balance = findInvestment.balance;
+    return balance;
+  });
+
+  const totalSavings = allSavingsBalance.reduce(
+    (previous, current) => previous + current
+  );
+  const totalInvestment = allInvestmentsBalance.reduce(
+    (previous, current) => previous + current
+  );
+
+  const walletBalance = child.walletBalance;
+
+  return { totalSavings, totalInvestment, walletBalance };
+};
+
+const getChildTotals = async (req, res) => {
+  try {
+    const { childId } = req.params;
+    const foundChild = await ChildModel.findById(childId);
+
+    if (!foundChild) {
+      res.status(400).send({ message: "child not found" });
+    }
+
+    const { totalSavings, totalInvestment, walletBalance } =
+      getAllChildBalance(foundChild);
+
+    res.status(200).send({ totalSavings, totalInvestment, walletBalance });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const getParentTotals = async (req, res) => {
+  try {
+    const { parentId } = req.params;
+
+    const foundParent = await UserModel.findById(parentId);
+
+    if (!foundParent) {
+      res.status(400).send({ message: "Parent not found" });
+    }
+
+    const { children } = foundParent;
+
+    const allChildBalanceArr = children.map(async (childId) => {
+      const child = await ChildModel.findById(childId);
+      const { totalSavings, totalInvestment, walletBalance } =
+        getAllChildBalance(child);
+      return { totalSavings, totalInvestment };
+    });
+
+    const { totalSavings, totalInvestment } = allChildBalanceArr.reduce(
+      (prev, curr) => {
+        return {
+          totalSavings: prev.totalSavings + curr.totalSavings,
+          totalInvestment: prev.totalInvestment + curr.totalInvestment,
+        };
+      }
+    );
+
+    res.status(200).send({ totalSavings, totalInvestment });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getPayLink,
   saveCard,
@@ -436,4 +511,6 @@ module.exports = {
   fundAChild,
   createInvestment,
   getSavings,
+  getChildTotals,
+  getParentTotals
 };
