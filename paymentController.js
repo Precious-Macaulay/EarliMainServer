@@ -425,24 +425,25 @@ const getSavings = async (req, res) => {
   }
 };
 
-const getAllChildBalance = async (child) => {
-  const allSavingsBalance = child.savings.map(async (id) => {
-    const findSavings = await ChildSavingsModel.findById(id);
-    const balance = findSavings.balance;
-    return balance;
-  });
-  const allInvestmentsBalance = child.investments.map(async (id) => {
-    const findInvestment = await ChildInvestmentModel.findById(id);
-    const balance = findInvestment.balance;
-    return balance;
+const getAllChildBalance = (child) => {
+  const allSavingsBalance = child.savings.map((savings) => {
+    return savings.balance;
   });
 
-  const totalSavings = allSavingsBalance.reduce(
-    (previous, current) => previous + current
-  );
-  const totalInvestment = allInvestmentsBalance.reduce(
-    (previous, current) => previous + current
-  );
+  const allInvestmentsBalance = child.investments.map((investment) => {
+    return investment.balance;
+  });
+
+  console.log(allInvestmentsBalance, allSavingsBalance);
+
+  const totalSavings =
+    allSavingsBalance.length > 0
+      ? allSavingsBalance.reduce((previous, current) => previous + current)
+      : 0;
+  const totalInvestment =
+    allInvestmentsBalance.length > 0
+      ? allInvestmentsBalance.reduce((previous, current) => previous + current)
+      : 0;
 
   const walletBalance = child.walletBalance;
 
@@ -452,7 +453,9 @@ const getAllChildBalance = async (child) => {
 const getChildTotals = async (req, res) => {
   try {
     const { childId } = req.params;
-    const foundChild = await ChildModel.findById(childId);
+    const foundChild = await ChildModel.findById(childId)
+      .populate("savings")
+      .populate("investments");
 
     if (!foundChild) {
       res.status(400).send({ message: "child not found" });
@@ -461,7 +464,9 @@ const getChildTotals = async (req, res) => {
     const { totalSavings, totalInvestment, walletBalance } =
       getAllChildBalance(foundChild);
 
-    res.status(200).send({ totalSavings, totalInvestment, walletBalance });
+    res
+      .status(200)
+      .send({ data: { totalSavings, totalInvestment, walletBalance } });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -471,22 +476,25 @@ const getParentTotals = async (req, res) => {
   try {
     const { parentId } = req.params;
 
-    const foundParent = await UserModel.findById(parentId);
+    const foundParent = await UserModel.findById(parentId).populate("children");
 
     if (!foundParent) {
       res.status(400).send({ message: "Parent not found" });
     }
+    console.log(foundParent.children);
 
-    const { children } = foundParent;
+    const allChildBalanceArr = await Promise.all(
+      foundParent.children.map(async (childId) => {
+        const child = await ChildModel.findById(childId._id)
+          .populate("savings")
+          .populate("investments");
+        const { totalSavings, totalInvestment, walletBalance } =
+          getAllChildBalance(child);
+        console.log({ totalSavings, totalInvestment });
+        return { totalSavings, totalInvestment };
+      })
+    );
 
-    const allChildBalanceArr = children.map(async (childId) => {
-      const child = await ChildModel.findById(childId);
-      const { totalSavings, totalInvestment, walletBalance } =
-        getAllChildBalance(child);
-      return { totalSavings, totalInvestment };
-    });
-    console.log(allChildBalanceArr);
-    
     const { totalSavings, totalInvestment } = allChildBalanceArr.reduce(
       (prev, curr) => {
         return {
@@ -513,5 +521,5 @@ module.exports = {
   createInvestment,
   getSavings,
   getChildTotals,
-  getParentTotals
+  getParentTotals,
 };
