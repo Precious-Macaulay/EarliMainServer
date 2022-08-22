@@ -4,7 +4,7 @@ const schema = new mongoose.Schema(
   {
     investmentType: {
       type: String,
-      enum: ["treasuryBills", "stocks", "RealEstate", "Shares"],
+      enum: ["Real Estate", "Stocks", "Treasury Bills", "Shares"],
       required: true,
     },
     balance: {
