@@ -327,7 +327,7 @@ const fundAChild = async (req, res) => {
       console.log(body.body);
       let response = JSON.parse(body.body);
       const { status, currency, id, amount, customer, metadata } =
-        response.data.data;
+        response.data;
 
       // check if transaction id already exist
 
