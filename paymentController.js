@@ -384,7 +384,7 @@ const createInvestment = async (req, res) => {
     if (!foundChild) {
       return res.status(400).send({ message: "Child not found" });
     } else {
-      if (foundChild.walletBalance < amount) {
+      if (foundChild.walletBalance < amount*100) {
         return res
           .status(400)
           .send({ message: "insufficient fund , fund child wallet" });
