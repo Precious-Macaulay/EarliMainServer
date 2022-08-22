@@ -12,7 +12,6 @@ const transactionSchema = Schema(
     },
     name: {
       type: String,
-      required: [true, "name is required"],
       trim: true,
     },
     email: {
@@ -34,7 +33,7 @@ const transactionSchema = Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["successful", "pending", "failed"],
+      enum: ["success", "pending", "failed"],
       default: "pending",
     },
     paymentGateway: {
