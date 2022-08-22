@@ -228,7 +228,7 @@ const getFund = async (req, res) => {
   try {
     const childId = req.params.childId;
 
-    const foundChild = await ChildModel.findById(childId).populate('user');
+    const foundChild = await ChildModel.findById(childId).populate("user");
 
     if (!foundChild) {
       res.status(400).json({ message: "Child not found" });
@@ -374,34 +374,39 @@ const fundAChild = async (req, res) => {
 };
 
 const createInvestment = async (req, res) => {
-  const { childId } = req.params.childId;
-  const { investmentType, amount, duration, interest } = req.body;
-
   try {
+    const childId  = req.params.childId;
+    const { investmentType, amount, duration, interest } = req.body;
+    console.log(req.body);
     const foundChild = await ChildModel.findById(childId);
+
+    console.log(foundChild);
     if (!foundChild) {
-      res.send(400).send({ message: "Child not found" });
+      return res.status(400).send({ message: "Child not found" });
+    } else {
+      if (foundChild.walletBalance < amount) {
+        return res
+          .status(400)
+          .send({ message: "insufficient fund , fund child wallet" });
+      } else {
+        foundChild.update({ $inc: { walletBalance: -amount } });
+
+        const newInvestment = await ChildInvestmentModel.create({
+          investmentType,
+          amount,
+          balance: amount,
+          duration,
+          interest,
+          status: "Active",
+          child: foundChild,
+        });
+        console.log(newInvestment);
+        return res.status(200).send({
+          message: "Investment created successfully",
+          data: newInvestment,
+        });
+      }
     }
-    if (foundChild.walletBalance < amount) {
-      res.send(400).send({ message: "insufficient fund , fund child wallet" });
-    }
-
-    foundChild.update({ $inc: { walletBalance: -amount } });
-
-    const newInvestment = await ChildInvestmentModel.create({
-      investmentType,
-      amount,
-      balance: amount,
-      duration,
-      interest,
-      status: "Active",
-      child: foundChild,
-    });
-
-    res.status(200).send({
-      message: "Investment created successfully",
-      data: newInvestment,
-    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -504,7 +509,7 @@ const getParentTotals = async (req, res) => {
       }
     );
 
-    res.status(200).send({data: { totalSavings, totalInvestment }});
+    res.status(200).send({ data: { totalSavings, totalInvestment } });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
