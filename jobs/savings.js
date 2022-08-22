@@ -22,9 +22,7 @@ module.exports = function (agenda) {
       if (error) throw new Error(error);
       let res = JSON.parse(response.body);
       console.log(res);
-      const ref = res.data.reference;
-      console.log(ref, "ref exist");
-      if (!ref) {
+      if (!res.data.reference) {
         console.log("no ref");
       } else {
         const options = {
