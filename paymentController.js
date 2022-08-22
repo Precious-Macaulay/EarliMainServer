@@ -284,6 +284,7 @@ const createTransaction = async (
       paymentStatus: status,
       paymentGateway: "paystack",
     });
+    console.log(transaction);
     return transaction;
   } catch (error) {
     console.log(error);
@@ -298,6 +299,7 @@ const updateChildWallet = async (
 ) => {
   try {
     const condition = { _id: childId };
+   
     // update wallet
     await ChildModel.findOneAndUpdate(condition, {
       $addToSet: { walletTransactions: createdWalletTransaction },
