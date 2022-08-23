@@ -299,7 +299,7 @@ const updateChildWallet = async (
 ) => {
   try {
     const condition = { _id: childId };
-   
+
     // update wallet
     await ChildModel.findOneAndUpdate(condition, {
       $addToSet: { walletTransactions: createdWalletTransaction },
@@ -377,7 +377,7 @@ const fundAChild = async (req, res) => {
 
 const createInvestment = async (req, res) => {
   try {
-    const childId  = req.params.childId;
+    const childId = req.params.childId;
     const { investmentType, amount, duration, interest } = req.body;
     console.log(req.body);
     const foundChild = await ChildModel.findById(childId);
@@ -386,18 +386,11 @@ const createInvestment = async (req, res) => {
     if (!foundChild) {
       return res.status(400).send({ message: "Child not found" });
     } else {
-      if (foundChild.walletBalance < amount*100) {
+      if (foundChild.walletBalance < amount * 100) {
         return res
           .status(400)
           .send({ message: "insufficient fund , fund child wallet" });
       } else {
-         const wallet = await ChildModel.findOneAndUpdate(
-      {_id: foundChild._id},
-      { $inc: { walletBalance: -amount*100 } },
-      { new: true }
-    );
-       
-
         const newInvestment = await ChildInvestmentModel.create({
           investmentType,
           amount,
@@ -407,6 +400,19 @@ const createInvestment = async (req, res) => {
           status: "Active",
           child: foundChild,
         });
+
+        await ChildModel.findOneAndUpdate(
+          { _id: foundChild._id },
+          { $inc: { walletBalance: -amount * 100 } },
+          { new: true }
+        );
+
+        await ChildModel.findOneAndUpdate(
+          { _id: foundChild._id },
+          { $addToSet: { investments: newInvestment } },
+          { new: true }
+        );
+
         console.log(newInvestment);
         return res.status(200).send({
           message: "Investment created successfully",
@@ -516,7 +522,15 @@ const getParentTotals = async (req, res) => {
       }
     );
 
-    res.status(200).send({ data: { totalSavings, totalInvestment, childTotals: allChildBalanceArr} });
+    res
+      .status(200)
+      .send({
+        data: {
+          totalSavings,
+          totalInvestment,
+          childTotals: allChildBalanceArr,
+        },
+      });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
