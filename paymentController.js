@@ -516,7 +516,7 @@ const getParentTotals = async (req, res) => {
       }
     );
 
-    res.status(200).send({ data: { totalSavings, totalInvestment } });
+    res.status(200).send({ data: { totalSavings, totalInvestment, childTotals: allChildBalanceArr} });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
