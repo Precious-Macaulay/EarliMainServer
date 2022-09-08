@@ -246,6 +246,21 @@ const getOneChild = async (req, res) => {
   }
 };
 
+const forgetPassword = async () => {
+  try {
+        const {email} = req.body
+        const findUser = await UserModel.findOne({email})
+        if(findUser){
+
+        }else{
+          res.status(400).json({message: "U"})
+        }
+  } catch (error) {
+        res.status(400).json({ message: error.message });
+
+  }
+}
+
 module.exports = {
   RegisterUser,
   VerifyOTP,
