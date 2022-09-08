@@ -198,18 +198,19 @@ const createChildAccount = async (req, res) => {
       image: image.secure_url,
       user: findUser,
     });
-
+    console.log(createChild);
     createChild.save();
 
     findUser.children.push(createChild);
     findUser.save();
+    console.log(findUser);
 
     res.status(201).json({
       message: "Child Account Created Successfully",
       data: createChild,
     });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json(error);
   }
 };
 
