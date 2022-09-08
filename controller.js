@@ -189,7 +189,6 @@ const createChildAccount = async (req, res) => {
     if (!findUser) {
       return res.status(400).json({ message: "User not found" });
     }
-    console.log("us")
 
     const createChild = new ChildModel({
       firstname,
@@ -211,7 +210,7 @@ const createChildAccount = async (req, res) => {
       data: createChild,
     });
   } catch (error) {
-    res.status(400).json(error);
+    res.status(400).json({error});
   }
 };
 
