@@ -198,7 +198,7 @@ const createChildAccount = async (req, res) => {
       image: image.secure_url,
       user: findUser,
     });
-    
+
     console.log(createChild);
 
     await UserModel.findOneAndUpdate(findUser._id, {
