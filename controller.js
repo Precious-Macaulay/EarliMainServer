@@ -170,7 +170,9 @@ const getAllUsers = async (req, res) => {
   try {
     const getAll = await UserModel.find();
     res.status(201).json({ message: "All Users", data: getAll });
-  } catch (error) {}
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 const createChildAccount = async (req, res) => {
@@ -237,11 +239,11 @@ const populateSavingsInChild = async (req, res) => {
 
 const getOneChild = async (req, res) => {
   try {
-    const childid = req.params.id;
-    const getChild = await ChildModel.findById(childid);
+    const childId = req.params.id;
+    const getChild = await ChildModel.findById(childId);
 
     if (!getChild) {
-      res.status(400).json({ message: "Child not Found, Check ID" });
+     return res.status(400).send({ message: "Child not Found, Check ID" });
     }
 
     res.status(201).json({ message: "One User Data", data: getChild });
