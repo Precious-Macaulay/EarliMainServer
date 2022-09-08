@@ -176,20 +176,18 @@ const getAllUsers = async (req, res) => {
 };
 
 const createChildAccount = async (req, res) => {
-  try {
-    const { firstname, lastname, dob, relationship } = req.body;
+  const { firstname, lastname, dob, relationship } = req.body;
+  const imageLink = req.file.path;
+  if (!imageLink) {
+    return res.status(400).json({ message: "Please input your image" });
+  }
+  const image = await cloudinary.uploader.upload(req.file.path);
 
+  try {
     const findUser = await UserModel.findById(req.params.id);
     if (!findUser) {
-      res.status(400).json({ message: "User not found" });
+      return res.status(400).json({ message: "User not found" });
     }
-
-    const imageLink = req.file.path;
-    if (!imageLink) {
-      res.status(400).json({ message: "Please input your image" });
-    }
-
-    const image = await cloudinary.uploader.upload(req.file.path);
 
     const createChild = new ChildModel({
       firstname,
@@ -198,9 +196,9 @@ const createChildAccount = async (req, res) => {
       relationship,
       imageId: image.public_id,
       image: image.secure_url,
+      user: findUser,
     });
 
-    createChild.user = findUser;
     createChild.save();
 
     findUser.children.push(createChild);
@@ -243,7 +241,7 @@ const getOneChild = async (req, res) => {
     const getChild = await ChildModel.findById(childId);
 
     if (!getChild) {
-     return res.status(400).send({ message: "Child not Found, Check ID" });
+      return res.status(400).send({ message: "Child not Found, Check ID" });
     }
 
     res.status(201).json({ message: "One User Data", data: getChild });
