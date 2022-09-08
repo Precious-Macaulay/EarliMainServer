@@ -170,45 +170,50 @@ const getAllUsers = async (req, res) => {
   try {
     const getAll = await UserModel.find();
     res.status(201).json({ message: "All Users", data: getAll });
-  } catch (error) {}
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 const createChildAccount = async (req, res) => {
-  try {
-    const { firstname, lastname, dob, relationship } = req.body;
+  const { firstname, lastname, dob, relationship } = req.body;
+  const imageLink = req.file.path;
+  if (!imageLink) {
+    return res.status(400).json({ message: "Please input your image" });
+  }
+  const image = await cloudinary.uploader.upload(req.file.path);
 
+  try {
     const findUser = await UserModel.findById(req.params.id);
     if (!findUser) {
-      res.status(400).json({ message: "User not found" });
+      return res.status(400).json({ message: "User not found" });
     }
 
-    const imageLink = req.file.path;
-    if (!imageLink) {
-      res.status(400).json({ message: "Please input your image" });
-    }
-
-    const image = await cloudinary.uploader.upload(req.file.path);
-
-    const createChild = new ChildModel({
+    const createChild = await ChildModel.create({
       firstname,
       lastname,
       dob,
       relationship,
       imageId: image.public_id,
       image: image.secure_url,
+      user: findUser,
     });
 
-    createChild.user = findUser;
-    createChild.save();
+    console.log(createChild);
 
-    findUser.children.push(createChild);
-    findUser.save();
+    await UserModel.findOneAndUpdate(findUser._id, {
+      $push: { children: createChild },
+    });
+
+    console.log(findUser);
 
     res.status(201).json({
       message: "Child Account Created Successfully",
       data: createChild,
     });
-  } catch (error) {}
+  } catch (error) {
+    res.status(400).json(error);
+  }
 };
 
 const populateChildInParents = async (req, res) => {
@@ -235,11 +240,13 @@ const populateSavingsInChild = async (req, res) => {
 
 const getOneChild = async (req, res) => {
   try {
-    const childid = req.params.id;
-    if (!childid) {
-      res.status(400).json({ message: "User not Found, Check ID" });
+    const childId = req.params.id;
+    const getChild = await ChildModel.findById(childId);
+
+    if (!getChild) {
+      return res.status(400).send({ message: "Child not Found, Check ID" });
     }
-    const getChild = await ChildModel.findById(childid);
+
     res.status(201).json({ message: "One User Data", data: getChild });
   } catch (error) {
     res.status(400).json({ message: error.message });

@@ -157,7 +157,7 @@ const createSavingsPlan = async (req, res) => {
 
     if (!findChild) {
       console.log("child not found");
-      res.status(404).send("Child not found");
+      return res.status(404).send("Child not found");
     } else {
       //find card
       const findCard = await CardModel.findById(cardId);
@@ -192,9 +192,10 @@ const createSavingsPlan = async (req, res) => {
           childId: findChild,
         });
 
-        findChild.savings.push(newPlan);
-        findChild.save();
-
+        await ChildModel.findOneAndUpdate(findChild._id, {
+          $push: { savings: newPlan },
+        });
+        
         console.log("plan added to DB", newPlan);
         console.log(form, startTime);
 
@@ -522,15 +523,13 @@ const getParentTotals = async (req, res) => {
       }
     );
 
-    res
-      .status(200)
-      .send({
-        data: {
-          totalSavings,
-          totalInvestment,
-          childTotals: allChildBalanceArr,
-        },
-      });
+    res.status(200).send({
+      data: {
+        totalSavings,
+        totalInvestment,
+        childTotals: allChildBalanceArr,
+      },
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
