@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const ChildModel = require("./childModels/ChildModel");
 const cloudinary = require("./utils/cloudinary");
 const RegisterVerification = require("./Gmail");
+const mongoose = require("mongoose");
 
 const RegisterUser = async (req, res) => {
   try {
@@ -188,24 +189,22 @@ const createChildAccount = async (req, res) => {
     if (!findUser) {
       return res.status(400).json({ message: "User not found" });
     }
+    console.log("us")
 
-    const createChild = await ChildModel.create({
+    const createChild = new ChildModel({
       firstname,
       lastname,
       dob,
       relationship,
       imageId: image.public_id,
       image: image.secure_url,
-      user: findUser,
-    });
+    })
 
-    console.log(createChild);
+    createChild.user = findUser
+     createChild.save()
 
-    await UserModel.findOneAndUpdate(findUser._id, {
-      $push: { children: createChild },
-    });
-
-    console.log(findUser);
+    findUser.children.push(mongoose.Types.ObjectId(createChild._id))
+     findUser.save()
 
     res.status(201).json({
       message: "Child Account Created Successfully",
@@ -258,8 +257,8 @@ const forgetPassword = async () => {
         const {email} = req.body
         const findUser = await UserModel.findOne({email})
         if(findUser){
-
-        }else{
+            
+        }else{  
           res.status(400).json({message: "U"})
         }
   } catch (error) {

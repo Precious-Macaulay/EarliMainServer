@@ -15,6 +15,8 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use("/dash", Agendash(agenda));
 
+
+const localUrl = "mongodb://localhost/Earli"
 const url = process.env.MONGOOSE_URL;
 mongoose.connect(url).then(() => {
   console.log("Connected to DB");
