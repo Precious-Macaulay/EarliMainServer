@@ -189,7 +189,7 @@ const createChildAccount = async (req, res) => {
       return res.status(400).json({ message: "User not found" });
     }
 
-    const createChild = new ChildModel({
+    const createChild = await ChildModel.create({
       firstname,
       lastname,
       dob,
@@ -198,11 +198,13 @@ const createChildAccount = async (req, res) => {
       image: image.secure_url,
       user: findUser,
     });
+    
     console.log(createChild);
-    createChild.save();
 
-    findUser.children.push(createChild);
-    findUser.save();
+    await UserModel.findOneAndUpdate(findUser._id, {
+      $push: { children: createChild },
+    });
+
     console.log(findUser);
 
     res.status(201).json({
