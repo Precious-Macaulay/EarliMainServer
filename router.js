@@ -23,7 +23,8 @@ const {
   createInvestment,
   getSavings,
   getChildTotals,
-  getParentTotals
+  getParentTotals,
+  testSavingsJob
 } = require("./paymentController");
 
 router.post("/register", RegisterUser);
@@ -45,5 +46,6 @@ router.get("/fundachild", fundAChild);
 router.get("/savings/:savingsid", getSavings);
 router.get("/parentsum/:parentId" , getParentTotals);
 router.get("/childsum/:childId" , getChildTotals);
+router.get("/test", testSavingsJob)
 
 module.exports = router;

@@ -564,7 +564,7 @@ try {
   });
 
   res.send("Done");
-  
+
 } catch (error) {
   console.log(error);
   res.status(400).json({ message: error.message });
@@ -583,4 +583,5 @@ module.exports = {
   getSavings,
   getChildTotals,
   getParentTotals,
+  testSavingsJob
 };
