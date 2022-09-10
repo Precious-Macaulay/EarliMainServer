@@ -192,7 +192,7 @@ const createSavingsPlan = async (req, res) => {
           childId: findChild,
         });
 
-        await ChildModel.findOneAndUpdate(findChild._id, {
+        await ChildModel.findOneAndUpdate({_id: findChild._id}, {
           $push: { savings: newPlan },
         });
         
