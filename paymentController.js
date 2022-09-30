@@ -184,7 +184,7 @@ const createSavingsPlan = async (req, res) => {
           plan: plan,
           frequency: frequency,
           startDate: startDate,
-          endDate: moment(new Date(endTime)).format("DD/MM/YYYY"),
+          endDate: new Date(endTime),
           status: "Active",
           card: findCard,
           duration: duration,
