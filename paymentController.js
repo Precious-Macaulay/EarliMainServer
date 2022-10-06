@@ -535,41 +535,41 @@ const getParentTotals = async (req, res) => {
   }
 };
 
-// const testSavingsJob = async (req,res) => {
-// try {
-//   await agenda.now("charge card",
-//   {
-//     form: {
-//       "authorization_code": "AUTH_g7xjsjvu67",
-//       "email": "preciousmacaulay001@gmail.com",
-//       "amount": 20000
-//     },
-//     plan: {
-//       "plan": "Earli",
-//       "balance": 0,
-//       "frequency": "daily",
-//       "startDate": "2022-09-08T23:00:00.000Z",
-//       "endDate": "2022-08-12T00:00:00.000Z",
-//       "status": "Active",
-//       "card": "631b20b2ffdee2bd8de6f260",
-//       "savingsTransaction": [],
-//       "duration": "3 Months",
-//       "amount": 200,
-//       "childId": "631b2068ffdee2bd8de6f23b",
-//       "_id": "631b20b8ffdee2bd8de6f268",
-//       "createdAt": "2022-09-09T11:17:12.565Z",
-//       "updatedAt": "2022-09-09T11:17:12.565Z",
-//       "__v": 0
-//     }
-//   });
+const testSavingsJob = async (req,res) => {
+try {
+  await agenda.now("charge card",
+  {
+    form: {
+      "authorization_code": "AUTH_g7xjsjvu67",
+      "email": "preciousmacaulay001@gmail.com",
+      "amount": 20000
+    },
+    plan: {
+      "plan": "Earli",
+      "balance": 0,
+      "frequency": "daily",
+      "startDate": "2022-09-08T23:00:00.000Z",
+      "endDate": "2022-08-12T00:00:00.000Z",
+      "status": "Active",
+      "card": "631b20b2ffdee2bd8de6f260",
+      "savingsTransaction": [],
+      "duration": "3 Months",
+      "amount": 200,
+      "childId": "631b2068ffdee2bd8de6f23b",
+      "_id": "631b20b8ffdee2bd8de6f268",
+      "createdAt": "2022-09-09T11:17:12.565Z",
+      "updatedAt": "2022-09-09T11:17:12.565Z",
+      "__v": 0
+    }
+  });
 
-//   res.send("Done");
+  res.send("Done");
 
-// } catch (error) {
-//   console.log(error);
-//   res.status(400).json({ message: error.message });
-// }
-// }
+} catch (error) {
+  console.log(error);
+  res.status(400).json({ message: error.message });
+}
+}
 
 module.exports = {
   getPayLink,
