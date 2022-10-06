@@ -3,6 +3,7 @@ const ChildModel = require("../childModels/ChildModel");
 const request = require("request");
 const Transaction = require("../childModels/transaction");
 const WalletTransaction = require("../childModels/walletTransaction");
+const { response } = require("express");
 
 module.exports = function (agenda) {
   agenda.define("charge card", async (job) => {
@@ -21,10 +22,8 @@ module.exports = function (agenda) {
     request(options, function (error, response) {
       if (error) throw new Error(error);
       let res = JSON.parse(response.body);
-      console.log(res);
-      let ref = res.data.reference;
-      if (!res.data.reference) {
-        console.log("no ref");
+      if (!res.status) {
+        console.log(res.message);
       } else {
         const options = {
           method: "GET",
