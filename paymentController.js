@@ -6,7 +6,7 @@ const ChildSavingsModel = require("./childModels/ChildSavingsModel");
 const UserModel = require("./UserModel");
 require("dotenv").config();
 const moment = require("moment");
-const agenda = require("./lib/agenda.js");
+const agenda = require("./worker.js");
 const Transaction = require("./childModels/transaction");
 const WalletTransaction = require("./childModels/walletTransaction");
 const ChildInvestmentModel = require("./childModels/ChildInvestmentModel");

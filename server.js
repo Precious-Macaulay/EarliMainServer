@@ -6,7 +6,7 @@ const app = express();
 const router = require("./router");
 const cors = require("cors");
 const Agendash = require("agendash");
-const agenda = require("./worker.js");
+const agenda = require("./lib/agenda");
 const bodyParser = require("body-parser");
 
 //middlewares
