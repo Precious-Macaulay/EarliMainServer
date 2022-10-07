@@ -25,27 +25,30 @@ module.exports = function (agenda) {
       if (!res.status) {
         console.log(res.message);
       } else {
-        const options = {
+        let ref = res.data.reference;
+        const verifyOptions = {
           method: "GET",
           url: `https://api.paystack.co/transaction/verify/${ref}`,
           headers: {
             Authorization: `Bearer ${process.env.SECRET_KEY}`,
           },
         };
-        request(options, async (error, response) => {
+        request(verifyOptions, async (error, response) => {
+          if (error) throw new Error(error);
           let resBody = JSON.parse(response.body);
           console.log(resBody);
-          if (error) throw new Error(error);
-          if (resBody.data.status === "success") {
+          if (resBody.status) {
             let { amount, currency, status } = resBody.data;
             console.log(amount);
-            const updateBalance = await ChildSavingsModel.findOneAndUpdate(
-              { _id: plan._id },
-              { $inc: { balance: amount } },
-              { new: true }
-            );
-            console.log("updated");
-            console.log(plan, updateBalance);
+            if (resBody.data.status === "success") {
+              const updateBalance = await ChildSavingsModel.findOneAndUpdate(
+                { _id: plan._id },
+                { $inc: { balance: amount } },
+                { new: true }
+              );
+              console.log("updated");
+              console.log(plan, updateBalance);
+            }
 
             const createdWalletTransaction = await WalletTransaction.create({
               amount,
@@ -60,7 +63,7 @@ module.exports = function (agenda) {
               { $addToSet: { savingsTransaction: createdWalletTransaction } }
             );
           } else {
-            console.log("Verify payment failed");
+            console.log(resBody.message);
           }
         });
       }
